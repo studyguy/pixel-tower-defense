@@ -39,34 +39,34 @@ canvas#cv{position:absolute;inset:0;width:832px;height:716px;display:block;backg
 @keyframes pulse{0%,100%{box-shadow:0 0 0 0 rgba(255,217,61,.45)}50%{box-shadow:0 0 0 7px rgba(255,217,61,0)}}
 
 /* ================= HUD ================= */
-#hud{top:0;left:0;right:0;height:46px;display:flex;align-items:center;justify-content:space-between;
-  padding:0 12px;background:linear-gradient(#2b2f52,#1b1e38);border-bottom:2px solid #000;z-index:5;font-size:14px;
+#hud{top:0;left:0;right:0;height:46px;display:flex;align-items:center;justify-content:space-between;overflow:hidden;
+  padding:0 10px;background:linear-gradient(#2b2f52,#1b1e38);border-bottom:2px solid #000;z-index:5;font-size:14px;
   box-shadow:0 2px 10px rgba(0,0,0,.4)}
-.hud-left{display:flex;align-items:center;gap:14px;min-width:280px}
+.hud-left{display:flex;align-items:center;gap:10px;flex:none}
 .stat{display:flex;align-items:center;gap:6px;font-weight:800}
 .stat b{color:var(--gold);font-size:17px;min-width:50px;text-shadow:0 1px 0 #000}
 #goldWrap.pop b{animation:pop .35s ease}
 @keyframes pop{0%{transform:scale(1)}40%{transform:scale(1.35);color:#fff}100%{transform:scale(1)}}
 .hpwrap{display:flex;align-items:center;gap:6px}
-.hpbar{position:relative;width:132px;height:15px;background:#2a0d18;border:1px solid #000;border-radius:8px;overflow:hidden;
+.hpbar{position:relative;width:108px;height:14px;background:#2a0d18;border:1px solid #000;border-radius:8px;overflow:hidden;
   box-shadow:inset 0 2px 4px rgba(0,0,0,.6)}
 #hudHpFill{height:100%;width:100%;background:linear-gradient(#5ee88c,#35b566);transition:width .18s,background .3s}
 .hpbar .ticks{position:absolute;inset:0;background:repeating-linear-gradient(90deg,transparent 0 18px,rgba(0,0,0,.35) 18px 19px);pointer-events:none}
 #hudHpText{font-size:12px;color:#ffb3b3;min-width:44px;font-weight:700}
-.hud-center{display:flex;flex-direction:column;align-items:center;gap:1px;text-align:center}
+.hud-center{display:flex;flex-direction:column;align-items:center;gap:1px;text-align:center;flex:1;min-width:0}
 #hudWave{font-weight:900;font-size:16px;letter-spacing:1px;color:#fff;text-shadow:0 1px 0 #000}
 #hudPhase{font-size:11.5px;color:#a8c8ff;min-height:13px}
-#wavePrev{display:flex;align-items:center;gap:5px;height:20px;margin-top:1px;font-size:0}
-#wavePrev .wp-item{display:flex;align-items:center;gap:2px;background:#171a30;border:1px solid var(--line);border-radius:9px;padding:0 5px;height:19px}
-#wavePrev .wp-item canvas{position:static;width:14px;height:14px}
-#wavePrev .wp-item b{font-size:10.5px;color:var(--dim);font-weight:700}
-.hud-right{display:flex;align-items:center;gap:7px;min-width:280px;justify-content:flex-end}
+#wavePrev{display:flex;align-items:center;gap:4px;height:19px;margin-top:1px;font-size:0;max-width:330px;overflow:hidden}
+#wavePrev .wp-item{display:flex;align-items:center;gap:2px;background:#171a30;border:1px solid var(--line);border-radius:9px;padding:0 4px;height:18px}
+#wavePrev .wp-item canvas{position:static;width:12px;height:12px}
+#wavePrev .wp-item b{font-size:10px;color:var(--dim);font-weight:700}
+.hud-right{display:flex;align-items:center;gap:6px;flex:none}
 #stratName{font-size:11.5px;font-weight:700;color:var(--cyan)}
 
 /* ================= 建造栏 ================= */
-#buildbar{bottom:0;left:0;right:0;height:98px;display:flex;align-items:center;gap:11px;padding:9px 14px;
+#buildbar{bottom:0;left:0;right:0;height:98px;display:flex;align-items:center;gap:9px;padding:9px 12px;overflow:hidden;
   background:linear-gradient(#1c1f3a,#131527);border-top:2px solid #000;z-index:5;box-shadow:0 -2px 10px rgba(0,0,0,.4)}
-.buildbtn{width:152px;height:80px;position:relative;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1px;
+.buildbtn{width:144px;height:80px;position:relative;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1px;
   background:linear-gradient(#2a2e4e,#222542);border:2px solid var(--line);border-radius:10px;color:var(--text);
   cursor:pointer;font-family:inherit;transition:border-color .12s,box-shadow .12s,transform .06s;overflow:visible}
 .buildbtn:hover{border-color:#8f9bd6;box-shadow:0 0 14px rgba(143,155,214,.25)}
@@ -77,8 +77,7 @@ canvas#cv{position:absolute;inset:0;width:832px;height:716px;display:block;backg
 .b-cost{font-size:11.5px;color:var(--gold);font-weight:700}
 .buildbtn.off .b-cost{color:var(--red)}
 .b-key{position:absolute;top:4px;left:6px;z-index:2}
-.bar-help{margin-left:auto;width:196px;font-size:10.5px;color:var(--dim);line-height:1.75;text-align:right}
-.bar-help .kbd{margin:0 2px}
+.bar-help-btn{margin-left:auto;display:flex;align-items:center;gap:6px;padding:8px 14px;font-size:12px}
 /* 建造卡片 tooltip */
 .tooltip{position:absolute;bottom:86px;left:50%;transform:translateX(-50%) translateY(6px);width:168px;z-index:9;
   background:rgba(10,11,20,.97);border:1px solid var(--line);border-radius:8px;padding:7px 9px;text-align:left;
@@ -132,15 +131,14 @@ canvas#cv{position:absolute;inset:0;width:832px;height:716px;display:block;backg
 .box .sub{color:#8f9bd6;font-size:12.5px;letter-spacing:5px;margin-bottom:20px}
 .box h2{font-size:24px;margin-bottom:14px}
 .diff-row{display:flex;justify-content:center;gap:12px;margin-bottom:20px}
-.diff{display:flex;flex-direction:column;align-items:center;gap:5px;padding:10px 12px 9px;border-radius:12px;cursor:pointer;
-  font-size:13px;font-weight:800;background:linear-gradient(#20233d,#191c33);border:2px solid var(--line);color:#c6cbe8;
+.diff{display:flex;flex-direction:column;align-items:center;gap:3px;padding:9px 18px;border-radius:12px;cursor:pointer;
+  font-size:13.5px;font-weight:800;background:linear-gradient(#20233d,#191c33);border:2px solid var(--line);color:#c6cbe8;
   transition:border-color .12s,box-shadow .12s,transform .06s}
 .diff:hover{border-color:#8f9bd6}
 .diff input{display:none}
 .diff:has(input:checked){border-color:var(--gold);color:var(--gold);box-shadow:0 0 18px rgba(255,217,61,.3)}
-.diff .mini{position:static;width:104px;height:60px;border-radius:7px;border:1px solid rgba(0,0,0,.6);display:block;box-shadow:inset 0 0 8px rgba(0,0,0,.5)}
-.diff-name{font-size:13.5px}
-.diff-params{font-size:9.5px;color:var(--dim);font-weight:600;line-height:1.5}
+.diff-name{font-size:14px;display:flex;align-items:center;gap:5px}
+.diff-params{font-size:10px;color:var(--dim);font-weight:600;line-height:1.4;white-space:nowrap}
 .diff:has(input:checked) .diff-params{color:#d9c98a}
 .big{background:linear-gradient(#ffe27a,#e8b82c);color:#241a00;border:1px solid #000;border-bottom:4px solid #8a6510;
   border-radius:12px;padding:13px 56px;font-size:19px;font-weight:900;cursor:pointer;font-family:inherit;letter-spacing:5px;
@@ -150,7 +148,7 @@ canvas#cv{position:absolute;inset:0;width:832px;height:716px;display:block;backg
 .big.blue{background:linear-gradient(#4d8aee,#2f6bc4);color:#fff;border-bottom-color:#102d57;box-shadow:none}
 .big.red{background:linear-gradient(#e0604f,#b43f2f);color:#fff;border-bottom-color:#55160f;box-shadow:none}
 .big.green{background:linear-gradient(#4cc96f,#2e8b4f);color:#fff;border-bottom-color:#11401f;box-shadow:none}
-.help{margin-top:18px;font-size:11px;color:var(--dim);line-height:2}
+.menu-help-btn{margin-top:14px;display:flex;justify-content:center}
 .menu-btns{display:flex;flex-direction:column;gap:10px;align-items:center;margin-top:6px}
 #endTitle{font-size:32px;font-weight:900;letter-spacing:3px}
 #endTitle.win{color:var(--green);text-shadow:0 0 22px rgba(74,222,128,.55)}
@@ -224,11 +222,7 @@ canvas#cv{position:absolute;inset:0;width:832px;height:716px;display:block;backg
         <span class="b-name">激光塔</span><span class="b-cost">🪙 160</span>
         <span class="tooltip" id="tip-laser"></span>
       </button>
-      <div class="bar-help">
-        1-4 选塔 · 右键/ESC 取消 · U 升级 · S 出售<br>
-        空格 提前开波 · T 切索敌 · P 暂停 · H 帮助<br>
-        不同难度的地图与路线各不相同！
-      </div>
+      <button class="btn icon bar-help-btn" id="btnHelpBar" title="操作帮助（H）">❓ 操作帮助</button>
     </div>
 
     <!-- 选中塔信息面板 -->
@@ -257,27 +251,23 @@ canvas#cv{position:absolute;inset:0;width:832px;height:716px;display:block;backg
         <div class="sub">PIXEL TOWER DEFENSE</div>
         <div class="diff-row">
           <label class="diff"><input type="radio" name="diff" id="diff-easy" value="easy">
-            <canvas class="mini" id="mini-easy" width="104" height="60"></canvas>
             <span class="diff-name">😊 简单</span>
             <span class="diff-params" id="params-easy"></span>
           </label>
           <label class="diff"><input type="radio" name="diff" id="diff-normal" value="normal" checked>
-            <canvas class="mini" id="mini-normal" width="104" height="60"></canvas>
             <span class="diff-name">⚔️ 普通</span>
             <span class="diff-params" id="params-normal"></span>
           </label>
           <label class="diff"><input type="radio" name="diff" id="diff-hard" value="hard">
-            <canvas class="mini" id="mini-hard" width="104" height="60"></canvas>
             <span class="diff-name">🔥 困难</span>
             <span class="diff-params" id="params-hard"></span>
           </label>
         </div>
         <button class="big" id="btnStart">开始游戏</button>
-        <div class="help">
-          1-4 选择塔 · 点击放置（绿=可放/红=不可放）· 右键或 ESC 取消放置<br>
-          U 升级 · S 出售 · P 暂停 · 空格 提前开始下一波 · T 切换索敌 · M 静音 · H 帮助<br>
-          共 20 波进攻，守住基地！
+        <div class="menu-help-btn">
+          <button class="btn icon" id="btnMenuHelp">📖 操作帮助</button>
         </div>
+        <div class="help-tip" style="margin-top:8px;font-size:10.5px;color:#6f769e">共 20 波进攻 · 不同难度地图不同 · 随时按 H 查看帮助</div>
       </div>
     </div>
 
@@ -1706,40 +1696,11 @@ function drawEnemyIcon(cvs, key){
   }
   ctx2.restore();
 }
-// 迷你地图（难度卡片）
-function drawMiniMapPreviews(){
-  for (const key of ['easy', 'normal', 'hard']){
-    const cvs = $('mini-' + key);
-    if (!cvs) continue;
-    const ctx2 = cvs.getContext('2d');
-    const W2 = cvs.width, H2 = cvs.height;
-    const sc = Math.min(W2 / MAP_W, H2 / MAP_H);
-    const ox = (W2 - MAP_W * sc) / 2, oy = (H2 - MAP_H * sc) / 2;
-    ctx2.clearRect(0, 0, W2, H2);
-    const m = MAPS[key];
-    const th = m.theme;
-    // 草地
-    ctx2.fillStyle = 'hsl(' + th.gHue + ',' + th.gSat + '%,' + (th.gBase + 6) + '%)';
-    ctx2.fillRect(0, 0, W2, H2);
-    // 路径
-    ctx2.lineJoin = 'round'; ctx2.lineCap = 'round';
-    ctx2.strokeStyle = th.pathMid; ctx2.lineWidth = Math.max(2, 6 * sc);
-    ctx2.beginPath();
-    m.waypoints.forEach((w, i) => {
-      const x = ox + w.x * CELL * sc, y = oy + w.y * CELL * sc;
-      i ? ctx2.lineTo(x, y) : ctx2.moveTo(x, y);
-    });
-    ctx2.stroke();
-    // 起点与基地
-    ctx2.fillStyle = '#9b5de5';
-    ctx2.beginPath(); ctx2.arc(ox + m.waypoints[0].x * CELL * sc, oy + m.waypoints[0].y * CELL * sc, 2.2, 0, 6.28); ctx2.fill();
-    ctx2.fillStyle = '#ff5b5b';
-    ctx2.beginPath(); ctx2.arc(ox + m.base.x * CELL * sc, oy + m.base.y * CELL * sc, 2.6, 0, 6.28); ctx2.fill();
-  }
-  // 难度参数
+// 难度卡片参数文字
+function setDiffParams(){
   for (const d of ['easy', 'normal', 'hard']){
     const el = $('params-' + d);
-    if (el) el.textContent = '基地 ' + DIFFS[d].baseHp + ' ❤ · 敌血 ' + DIFFS[d].hp + '× · 金币 ' + DIFFS[d].gold + '×';
+    if (el) el.textContent = '基地 ' + DIFFS[d].baseHp + '❤ · 敌血 ' + DIFFS[d].hp + '× · 金币 ' + DIFFS[d].gold + '×';
   }
 }
 // 下一波 / 本波敌人预览（按波次缓存，避免每帧重建 DOM）
@@ -1781,7 +1742,7 @@ function fillTooltips(){
 function initUI(){
   for (const k of ['arrow', 'cannon', 'frost', 'laser']) drawTowerIcon($('icon-' + k), k, 0);
   fillTooltips();
-  drawMiniMapPreviews();
+  setDiffParams();
 }
 
 /* ============================================================
@@ -1875,6 +1836,8 @@ $('btnMute').addEventListener('click', toggleMute);
 $('btnStrategy').addEventListener('click', cycleStrategy);
 $('btnEarly').addEventListener('click', earlyStart);
 $('btnHelp').addEventListener('click', toggleHelp);
+$('btnHelpBar').addEventListener('click', toggleHelp);
+$('btnMenuHelp').addEventListener('click', toggleHelp);
 $('btnHelpClose').addEventListener('click', toggleHelp);
 $('btnCancelPlace').addEventListener('click', cancelPlace);
 $('btnUpgrade').addEventListener('click', upgradeSelected);
@@ -1887,11 +1850,7 @@ $('btnEndMenu').addEventListener('click', toMenu);
 $('btnStart').addEventListener('click', startGame);
 for (const d of ['easy', 'normal', 'hard'])
   $('diff-' + d).addEventListener('change', e => {
-    if (e.target.checked){
-      diff = DIFFS[e.target.value];
-      applyMap(diff.map);          // 菜单中切换难度 → 背景即时显示所选地图
-      drawMiniMapPreviews();
-    }
+    if (e.target.checked) diff = DIFFS[e.target.value];
   });
   applyMap('normal');
   initUI();
