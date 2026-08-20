@@ -45,6 +45,7 @@ canvas#cv{position:absolute;inset:0;width:832px;height:716px;display:block;backg
 .hud-left{display:flex;align-items:center;gap:10px;flex:none}
 .stat{display:flex;align-items:center;gap:6px;font-weight:800}
 .stat b{color:var(--gold);font-size:17px;min-width:50px;text-shadow:0 1px 0 #000}
+#goldRate{font-size:10px;color:var(--dim);font-weight:700;margin-left:-3px}
 #goldWrap.pop b{animation:pop .35s ease}
 @keyframes pop{0%{transform:scale(1)}40%{transform:scale(1.35);color:#fff}100%{transform:scale(1)}}
 .hpwrap{display:flex;align-items:center;gap:6px}
@@ -180,7 +181,7 @@ canvas#cv{position:absolute;inset:0;width:832px;height:716px;display:block;backg
     <!-- 顶部 HUD -->
     <div id="hud" class="layer">
       <div class="hud-left">
-        <div class="stat" id="goldWrap"><span class="ico">🪙</span><b id="hudGold">200</b></div>
+        <div class="stat" id="goldWrap"><span class="ico">🪙</span><b id="hudGold">200</b><span id="goldRate">+1.0/秒</span></div>
         <div class="hpwrap"><span class="ico">❤️</span><div class="hpbar"><div id="hudHpFill"></div><div class="ticks"></div></div><span id="hudHpText">20/20</span></div>
       </div>
       <div class="hud-center">
@@ -631,6 +632,7 @@ function rr(ctx, x, y, w, h, r){
 ============================================================ */
 let gameState = 'menu';          // menu | playing | paused | over
 let gold = 200, baseHp = 20, baseMax = 20;
+let goldIncome = 1;   // 被动收入（金/秒，随波次成长）
 let waveIndex = 1;               // 下一波编号（1 起）
 let phase = 'intermission';      // intermission | wave
 let interT = 15;
@@ -963,6 +965,7 @@ function startWave(){
   }
   queue.sort((a, b) => a.t - b.t);
   waveHpScale = 1 + CFG.hpK * (waveIndex - 1);
+  goldIncome = 1 + 0.15 * (waveIndex - 1);   // 被动收入随波次成长
   waveSpdScale = Math.min(1.45, 1 + 0.03 * (waveIndex - 1));
   const isBoss = BOSS_WAVES.has(waveIndex);
   showBanner(isBoss ? ('⚠️ 第 ' + waveIndex + ' 波 · BOSS 来袭 ⚠️') : ('第 ' + waveIndex + ' 波来袭！'), isBoss);
@@ -971,7 +974,7 @@ function startWave(){
 function clearWave(){
   if (gameState !== 'playing') return;
   const cleared = waveIndex;
-  const bonus = 40 + 8 * cleared;
+  const bonus = 30 + 6 * cleared;
   gold += bonus; totalEarned += bonus;
   addText(W / 2, TOP + 70, '第 ' + cleared + ' 波清除！ +' + bonus + '金', '#ffd93d', 17);
   AudioSys.play('upgrade');
@@ -985,7 +988,7 @@ function clearWave(){
 }
 function earlyStart(){
   if (phase !== 'intermission' || gameState !== 'playing') return;
-  const bonus = 25 + 4 * waveIndex;
+  const bonus = 20 + 3 * waveIndex;
   gold += bonus; totalEarned += bonus;
   addText(W / 2, TOP + 70, '提前开始！ +' + bonus + '金', '#ffd93d', 17);
   startWave();
@@ -1004,6 +1007,7 @@ function startGame(){
   applyMap(CFG.map);
   gold = 200; baseMax = CFG.baseHp; baseHp = baseMax;
   waveIndex = 1; phase = 'intermission'; interT = CFG.prep;
+  goldIncome = 1;
   queue = []; spawnElapsed = 0;
   enemies = []; towers = []; projs = []; parts = []; rings = []; beams = []; texts = [];
   buildType = null; selTower = null;
@@ -1081,6 +1085,11 @@ function update(dt){
     if (!queue.length && !enemies.length) clearWave();
   }
 
+  // 被动收入（随时间持续获得金币）
+  if (goldIncome > 0){
+    gold += goldIncome * dt;
+    totalEarned += goldIncome * dt;
+  }
   for (const e of enemies) e.update(dt);
   enemies = enemies.filter(e => !e.dead);
   for (const t of towers) t.update(dt);
@@ -1941,7 +1950,7 @@ let lastGold = 200;
 function refreshHUD(){
   const g = Math.floor(gold);
   $('hudGold').textContent = g;
-  if (g > lastGold){
+  if (g - lastGold > 3){
     const gw = $('goldWrap');
     gw.classList.remove('pop');
     void gw.offsetWidth;
@@ -1956,7 +1965,8 @@ function refreshHUD(){
   $('hudPhase').textContent = phase === 'intermission'
     ? '准备 ' + Math.ceil(Math.max(0, interT)) + 's'
     : '剩余 ' + remaining() + ' 敌';
-  $('btnEarly').textContent = '⏩ 提前开始 (+' + (25 + 4 * waveIndex) + '金)';
+  $('btnEarly').textContent = '⏩ 提前开始 (+' + (20 + 3 * waveIndex) + '金)';
+  $('goldRate').textContent = '+' + goldIncome.toFixed(1) + '/秒';
   $('stratName').textContent = STRAT_NAMES[strategy];
   $('btnMute').textContent = AudioSys.muted ? '🔇' : '🔊';
   // 第二层信息条：放置中 → 提示；准备 → 提前开波+下一波；战斗 → 本波预览
