@@ -5,98 +5,166 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
 <title>像素塔防 - Pixel Tower Defense</title>
 <style>
-/* ================= 基础 ================= */
+/* ================= 设计系统 ================= */
+:root{
+  --bg0:#0b0c15; --panel:#1b1e33; --panel2:#262a47; --line:#3a4068;
+  --gold:#ffd93d; --gold-d:#d9a92a; --cyan:#7fe9ff; --green:#4ade80;
+  --red:#ff6b6b; --text:#e9ebf7; --dim:#98a0c5;
+}
 *{margin:0;padding:0;box-sizing:border-box;user-select:none;-webkit-user-select:none;-webkit-tap-highlight-color:transparent}
-html,body{width:100%;height:100%;overflow:hidden;background:#0e0e18;overscroll-behavior:none;touch-action:none}
-body{font-family:'Segoe UI','PingFang SC','Hiragino Sans GB','Microsoft YaHei',sans-serif;color:#eee}
-#stage{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;background:radial-gradient(circle at 50% 35%,#232340,#0d0d17)}
+html,body{width:100%;height:100%;overflow:hidden;background:var(--bg0);overscroll-behavior:none;touch-action:none}
+body{font-family:'Segoe UI','PingFang SC','Hiragino Sans GB','Microsoft YaHei',sans-serif;color:var(--text)}
+#stage{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;background:radial-gradient(circle at 50% 30%,#252550,#0a0a13)}
 #wrap{position:relative;width:832px;height:716px;flex:none;transform-origin:center center;
-  box-shadow:0 0 80px rgba(0,0,0,.7),0 0 0 2px #000;border-radius:10px;overflow:hidden}
-canvas{position:absolute;inset:0;width:832px;height:716px;display:block;background:#4f7d3b}
+  box-shadow:0 0 90px rgba(0,0,0,.75),0 0 0 2px #000;border-radius:12px;overflow:hidden}
+canvas#cv{position:absolute;inset:0;width:832px;height:716px;display:block;background:#4f7d3b}
 .layer{position:absolute}
 .hidden{display:none!important}
+.kbd{display:inline-block;min-width:16px;padding:0 4px;border:1px solid var(--line);border-bottom-width:2px;border-radius:4px;
+  background:#232642;color:var(--cyan);font-size:10.5px;font-weight:700;text-align:center;line-height:15px}
+
+/* ================= 通用按钮 ================= */
+.btn{background:linear-gradient(#343a5e,#262b49);color:var(--text);border:1px solid #000;border-bottom:3px solid #101225;
+  border-radius:8px;padding:5px 11px;font-size:12.5px;font-weight:700;cursor:pointer;font-family:inherit;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.08);transition:filter .12s,transform .05s}
+.btn:hover{filter:brightness(1.18)}
+.btn:active{transform:translateY(1px);border-bottom-width:2px}
+.btn.icon{display:flex;align-items:center;gap:5px;padding:5px 9px;font-size:13px}
+.btn.gold{background:linear-gradient(#8a6a1e,#6d5216);border-bottom-color:#3c2d0a;color:var(--gold)}
+.btn.green{background:linear-gradient(#2e8b4f,#23703f);border-bottom-color:#11401f}
+.btn.red{background:linear-gradient(#c2453a,#9e352c);border-bottom-color:#55160f}
+.btn.blue{background:linear-gradient(#2f6bc4,#26579f);border-bottom-color:#102d57}
+.btn:disabled{opacity:.38;pointer-events:none;filter:saturate(.4)}
+#btnEarly{display:none;animation:pulse 1.1s ease infinite}
+@keyframes pulse{0%,100%{box-shadow:0 0 0 0 rgba(255,217,61,.45)}50%{box-shadow:0 0 0 7px rgba(255,217,61,0)}}
 
 /* ================= HUD ================= */
-#hud{top:0;left:0;right:0;height:44px;display:flex;align-items:center;justify-content:space-between;
-  padding:0 12px;background:linear-gradient(#30304a,#202038);border-bottom:2px solid #000;z-index:5;font-size:14px}
-.hud-left{display:flex;align-items:center;gap:16px;min-width:280px}
-.stat{display:flex;align-items:center;gap:6px;font-weight:700}
-.stat b{color:#ffd93d;font-size:17px;min-width:52px}
+#hud{top:0;left:0;right:0;height:46px;display:flex;align-items:center;justify-content:space-between;
+  padding:0 12px;background:linear-gradient(#2b2f52,#1b1e38);border-bottom:2px solid #000;z-index:5;font-size:14px;
+  box-shadow:0 2px 10px rgba(0,0,0,.4)}
+.hud-left{display:flex;align-items:center;gap:14px;min-width:280px}
+.stat{display:flex;align-items:center;gap:6px;font-weight:800}
+.stat b{color:var(--gold);font-size:17px;min-width:50px;text-shadow:0 1px 0 #000}
+#goldWrap.pop b{animation:pop .35s ease}
+@keyframes pop{0%{transform:scale(1)}40%{transform:scale(1.35);color:#fff}100%{transform:scale(1)}}
 .hpwrap{display:flex;align-items:center;gap:6px}
-.hpbar{width:130px;height:14px;background:#3a1020;border:1px solid #000;border-radius:7px;overflow:hidden}
-#hudHpFill{height:100%;width:100%;background:#4ade80;transition:width .15s}
-#hudHpText{font-size:12px;color:#ffb3b3;min-width:44px}
-.hud-center{display:flex;flex-direction:column;align-items:center;gap:2px;text-align:center}
-#hudWave{font-weight:800;font-size:15px;letter-spacing:1px;color:#fff}
-#hudPhase{font-size:12px;color:#9ecbff;min-height:14px}
-.hud-right{display:flex;align-items:center;gap:8px;min-width:280px;justify-content:flex-end}
-.btn{background:#3b4057;color:#eee;border:1px solid #000;border-radius:6px;padding:5px 10px;font-size:12.5px;font-weight:600;cursor:pointer;font-family:inherit}
-.btn:hover{background:#4a5070}
-.btn:active{transform:translateY(1px)}
-.btn.gold{background:#7a5a16;color:#ffd93d}
-.btn.gold:hover{background:#8f6a1a}
-#btnEarly{display:none;animation:pulse 1.1s ease infinite}
-@keyframes pulse{0%,100%{box-shadow:0 0 0 0 rgba(255,217,61,.5)}50%{box-shadow:0 0 0 6px rgba(255,217,61,0)}}
+.hpbar{position:relative;width:132px;height:15px;background:#2a0d18;border:1px solid #000;border-radius:8px;overflow:hidden;
+  box-shadow:inset 0 2px 4px rgba(0,0,0,.6)}
+#hudHpFill{height:100%;width:100%;background:linear-gradient(#5ee88c,#35b566);transition:width .18s,background .3s}
+.hpbar .ticks{position:absolute;inset:0;background:repeating-linear-gradient(90deg,transparent 0 18px,rgba(0,0,0,.35) 18px 19px);pointer-events:none}
+#hudHpText{font-size:12px;color:#ffb3b3;min-width:44px;font-weight:700}
+.hud-center{display:flex;flex-direction:column;align-items:center;gap:1px;text-align:center}
+#hudWave{font-weight:900;font-size:16px;letter-spacing:1px;color:#fff;text-shadow:0 1px 0 #000}
+#hudPhase{font-size:11.5px;color:#a8c8ff;min-height:13px}
+#wavePrev{display:flex;align-items:center;gap:5px;height:20px;margin-top:1px;font-size:0}
+#wavePrev .wp-item{display:flex;align-items:center;gap:2px;background:#171a30;border:1px solid var(--line);border-radius:9px;padding:0 5px;height:19px}
+#wavePrev .wp-item canvas{position:static;width:14px;height:14px}
+#wavePrev .wp-item b{font-size:10.5px;color:var(--dim);font-weight:700}
+.hud-right{display:flex;align-items:center;gap:7px;min-width:280px;justify-content:flex-end}
+#stratName{font-size:11.5px;font-weight:700;color:var(--cyan)}
 
 /* ================= 建造栏 ================= */
-#buildbar{bottom:0;left:0;right:0;height:96px;display:flex;align-items:center;gap:10px;padding:8px 12px;
-  background:linear-gradient(#202038,#17172a);border-top:2px solid #000;z-index:5}
-.buildbtn{width:150px;height:78px;position:relative;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;
-  background:#2c2f45;border:2px solid #4a4f6d;border-radius:8px;color:#eee;cursor:pointer;font-family:inherit;transition:transform .06s}
-.buildbtn:hover{border-color:#8f9bd6;background:#343854}
-.buildbtn.sel{border-color:#ffd93d;background:#4a4426;box-shadow:0 0 12px rgba(255,217,61,.35)}
-.buildbtn.off{opacity:.42;pointer-events:none}
-.b-ico{font-size:24px;line-height:1}
-.b-name{font-size:14px;font-weight:800}
-.b-cost{font-size:12px;color:#ffd93d}
-.b-key{position:absolute;top:3px;left:6px;font-size:10px;color:#8f9bd6;background:#1d2030;border:1px solid #4a4f6d;border-radius:3px;padding:0 4px}
-.bar-help{margin-left:auto;width:190px;font-size:11px;color:#8b8fae;line-height:1.7;text-align:right}
+#buildbar{bottom:0;left:0;right:0;height:98px;display:flex;align-items:center;gap:11px;padding:9px 14px;
+  background:linear-gradient(#1c1f3a,#131527);border-top:2px solid #000;z-index:5;box-shadow:0 -2px 10px rgba(0,0,0,.4)}
+.buildbtn{width:152px;height:80px;position:relative;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1px;
+  background:linear-gradient(#2a2e4e,#222542);border:2px solid var(--line);border-radius:10px;color:var(--text);
+  cursor:pointer;font-family:inherit;transition:border-color .12s,box-shadow .12s,transform .06s;overflow:visible}
+.buildbtn:hover{border-color:#8f9bd6;box-shadow:0 0 14px rgba(143,155,214,.25)}
+.buildbtn.sel{border-color:var(--gold);background:linear-gradient(#4a4426,#3a351d);box-shadow:0 0 16px rgba(255,217,61,.4)}
+.buildbtn.off{opacity:.4;filter:grayscale(.5);pointer-events:none}
+.buildbtn .tower-icon{position:static;width:42px;height:42px;border:none;display:block;filter:drop-shadow(0 2px 2px rgba(0,0,0,.4))}
+.b-name{font-size:13.5px;font-weight:800;line-height:1.1}
+.b-cost{font-size:11.5px;color:var(--gold);font-weight:700}
+.buildbtn.off .b-cost{color:var(--red)}
+.b-key{position:absolute;top:4px;left:6px;z-index:2}
+.bar-help{margin-left:auto;width:196px;font-size:10.5px;color:var(--dim);line-height:1.75;text-align:right}
+.bar-help .kbd{margin:0 2px}
+/* 建造卡片 tooltip */
+.tooltip{position:absolute;bottom:86px;left:50%;transform:translateX(-50%) translateY(6px);width:168px;z-index:9;
+  background:rgba(10,11,20,.97);border:1px solid var(--line);border-radius:8px;padding:7px 9px;text-align:left;
+  opacity:0;pointer-events:none;transition:opacity .15s,transform .15s;box-shadow:0 6px 18px rgba(0,0,0,.6)}
+.buildbtn:hover .tooltip{opacity:1;transform:translateX(-50%) translateY(0)}
+.tooltip .t-name{font-size:12px;font-weight:800;color:var(--gold);margin-bottom:3px}
+.tooltip .t-desc{font-size:10.5px;color:var(--dim);margin-bottom:4px}
+.tooltip .t-stat{font-size:10.5px;color:var(--cyan);line-height:1.6}
+
+/* ================= 放置提示条 ================= */
+#placeBar{top:52px;left:50%;transform:translateX(-50%);display:flex;align-items:center;gap:10px;z-index:7;
+  background:rgba(12,14,26,.92);border:1px solid var(--gold);border-radius:20px;padding:5px 8px 5px 16px;
+  box-shadow:0 4px 16px rgba(0,0,0,.5);font-size:12.5px;font-weight:700;color:var(--gold)}
+#placeBar .btn{padding:3px 12px;font-size:12px}
 
 /* ================= 选中面板 ================= */
-#towerPanel{right:10px;bottom:104px;width:236px;background:rgba(18,18,32,.95);border:2px solid #4a4f6d;border-radius:10px;
-  padding:10px 12px;z-index:6;box-shadow:0 4px 20px rgba(0,0,0,.5)}
-.p-title{font-size:15px;font-weight:800;display:flex;justify-content:space-between;align-items:center;margin-bottom:6px}
-.p-title .lv{color:#ffd93d;font-size:12px;background:#3a3418;padding:1px 7px;border-radius:9px}
-.p-row{font-size:12px;color:#c9cde8;margin:2px 0;display:flex;justify-content:space-between}
-.p-row span{color:#9fe8ff}
-.p-next{font-size:11px;color:#7dff9a;margin-top:4px}
-.p-btns{display:flex;gap:8px;margin-top:8px}
-.p-btns .btn{flex:1;padding:7px 0;font-size:13px}
-.btn:disabled{opacity:.4;pointer-events:none}
+#towerPanel{right:10px;bottom:106px;width:250px;background:linear-gradient(rgba(22,24,42,.97),rgba(15,16,30,.97));
+  border:2px solid var(--line);border-radius:12px;padding:11px 13px;z-index:6;box-shadow:0 8px 26px rgba(0,0,0,.6)}
+.p-head{display:flex;align-items:center;gap:9px;margin-bottom:8px}
+.p-head canvas{position:static;width:40px;height:40px;display:block}
+.p-title{font-size:14.5px;font-weight:800;display:flex;flex-direction:column;gap:2px}
+.p-title .nm{display:flex;align-items:center;gap:6px}
+.p-title .lv{color:var(--gold);font-size:10.5px;background:#3a3418;padding:1px 7px;border-radius:9px;font-weight:800}
+.stars{font-size:10px;letter-spacing:1px;color:var(--gold)}
+.p-row{font-size:11.5px;color:#c6cbe8;margin:2.5px 0;display:flex;justify-content:space-between;align-items:baseline}
+.p-row span{color:var(--cyan);font-weight:700}
+.p-row .p-old{color:#8b90b5;font-weight:600}
+.p-row .p-arr{color:var(--green);font-weight:800}
+.p-next{font-size:10.5px;color:var(--green);margin-top:3px;background:rgba(74,222,128,.08);border-radius:5px;padding:3px 6px}
+.p-btns{display:flex;gap:8px;margin-top:9px}
+.p-btns .btn{flex:1;padding:8px 0;font-size:13px;display:flex;align-items:center;justify-content:center;gap:6px}
 
-/* ================= 横幅 ================= */
-#banner{top:62px;left:0;right:0;text-align:center;font-size:34px;font-weight:900;color:#ffd93d;letter-spacing:5px;
-  text-shadow:0 2px 0 #000,0 0 20px rgba(255,217,61,.55);opacity:0;pointer-events:none;z-index:8;
-  font-family:'Segoe UI','PingFang SC','Microsoft YaHei',sans-serif}
-#banner.boss{color:#ff5b5b;text-shadow:0 2px 0 #000,0 0 24px rgba(255,60,60,.75)}
+/* ================= 波次横幅 ================= */
+#banner{top:60px;left:50%;transform:translateX(-50%);text-align:center;font-size:30px;font-weight:900;color:var(--gold);
+  letter-spacing:4px;text-shadow:0 2px 0 #000,0 0 22px rgba(255,217,61,.55);pointer-events:none;z-index:8;
+  background:linear-gradient(90deg,transparent,rgba(12,14,26,.82) 18%,rgba(12,14,26,.82) 82%,transparent);
+  padding:10px 30px;border-top:2px solid var(--gold-d);border-bottom:2px solid var(--gold-d);
+  font-family:'Segoe UI','PingFang SC','Microsoft YaHei',sans-serif;opacity:0}
+#banner.boss{color:#ff5b5b;border-color:#c0392b;text-shadow:0 2px 0 #000,0 0 24px rgba(255,60,60,.75);
+  background:repeating-linear-gradient(-45deg,rgba(60,10,10,.82) 0 14px,rgba(12,14,26,.82) 14px 28px)}
 #banner.show{animation:bn 2.6s ease forwards}
-@keyframes bn{0%{opacity:0;transform:translateY(-16px) scale(.7)}12%{opacity:1;transform:none}76%{opacity:1}100%{opacity:0;transform:translateY(10px)}}
+@keyframes bn{0%{opacity:0;transform:translateX(-50%) translateY(-14px) scale(.85)}12%{opacity:1;transform:translateX(-50%) scale(1)}76%{opacity:1}100%{opacity:0;transform:translateX(-50%) translateY(8px)}}
 
 /* ================= 覆盖层菜单 ================= */
-.overlay{inset:0;display:flex;align-items:center;justify-content:center;background:rgba(8,8,16,.86);z-index:20}
-.box{background:linear-gradient(#2a2a44,#1b1b30);border:2px solid #4a4f6d;border-radius:14px;padding:30px 44px;
-  text-align:center;box-shadow:0 10px 60px rgba(0,0,0,.8);max-width:560px}
-.box h1{font-size:40px;letter-spacing:6px;color:#ffd93d;text-shadow:0 3px 0 #000,0 0 24px rgba(255,217,61,.4);margin-bottom:2px}
-.box .sub{color:#8f9bd6;font-size:13px;letter-spacing:3px;margin-bottom:22px}
-.box h2{font-size:26px;margin-bottom:14px}
-.diff-row{display:flex;justify-content:center;gap:12px;margin-bottom:22px}
-.diff{display:flex;align-items:center;gap:6px;padding:8px 16px;border-radius:9px;cursor:pointer;font-size:14px;font-weight:700;
-  background:#22253a;border:2px solid #4a4f6d;color:#c9cde8}
+.overlay{inset:0;display:flex;align-items:center;justify-content:center;background:rgba(7,8,15,.78);z-index:20;
+  backdrop-filter:blur(2px)}
+.box{background:linear-gradient(#242748cc,#161831cc);border:2px solid var(--line);border-radius:16px;padding:26px 40px;
+  text-align:center;box-shadow:0 14px 70px rgba(0,0,0,.85);max-width:600px}
+.box h1{font-size:42px;letter-spacing:8px;color:var(--gold);margin-bottom:2px;
+  text-shadow:0 3px 0 #000,0 0 28px rgba(255,217,61,.45),0 0 60px rgba(255,217,61,.2)}
+.box .sub{color:#8f9bd6;font-size:12.5px;letter-spacing:5px;margin-bottom:20px}
+.box h2{font-size:24px;margin-bottom:14px}
+.diff-row{display:flex;justify-content:center;gap:12px;margin-bottom:20px}
+.diff{display:flex;flex-direction:column;align-items:center;gap:5px;padding:10px 12px 9px;border-radius:12px;cursor:pointer;
+  font-size:13px;font-weight:800;background:linear-gradient(#20233d,#191c33);border:2px solid var(--line);color:#c6cbe8;
+  transition:border-color .12s,box-shadow .12s,transform .06s}
+.diff:hover{border-color:#8f9bd6}
 .diff input{display:none}
-.diff:has(input:checked){border-color:#ffd93d;background:#4a4426;color:#ffd93d}
-.big{background:#ffd93d;color:#241a00;border:none;border-radius:10px;padding:12px 54px;font-size:19px;font-weight:900;cursor:pointer;font-family:inherit;letter-spacing:4px}
-.big:hover{background:#ffe27a}
-.big.blue{background:#3d7bd9;color:#fff}.big.blue:hover{background:#5490ea}
-.big.red{background:#d94f3d;color:#fff}.big.red:hover{background:#e8654f}
-.big.green{background:#3fae5a;color:#fff}.big.green:hover{background:#51c66d}
-.help{margin-top:20px;font-size:11.5px;color:#8b8fae;line-height:1.9}
+.diff:has(input:checked){border-color:var(--gold);color:var(--gold);box-shadow:0 0 18px rgba(255,217,61,.3)}
+.diff .mini{position:static;width:104px;height:60px;border-radius:7px;border:1px solid rgba(0,0,0,.6);display:block;box-shadow:inset 0 0 8px rgba(0,0,0,.5)}
+.diff-name{font-size:13.5px}
+.diff-params{font-size:9.5px;color:var(--dim);font-weight:600;line-height:1.5}
+.diff:has(input:checked) .diff-params{color:#d9c98a}
+.big{background:linear-gradient(#ffe27a,#e8b82c);color:#241a00;border:1px solid #000;border-bottom:4px solid #8a6510;
+  border-radius:12px;padding:13px 56px;font-size:19px;font-weight:900;cursor:pointer;font-family:inherit;letter-spacing:5px;
+  box-shadow:0 6px 22px rgba(255,217,61,.25);transition:filter .12s,transform .05s}
+.big:hover{filter:brightness(1.08)}
+.big:active{transform:translateY(2px);border-bottom-width:2px}
+.big.blue{background:linear-gradient(#4d8aee,#2f6bc4);color:#fff;border-bottom-color:#102d57;box-shadow:none}
+.big.red{background:linear-gradient(#e0604f,#b43f2f);color:#fff;border-bottom-color:#55160f;box-shadow:none}
+.big.green{background:linear-gradient(#4cc96f,#2e8b4f);color:#fff;border-bottom-color:#11401f;box-shadow:none}
+.help{margin-top:18px;font-size:11px;color:var(--dim);line-height:2}
 .menu-btns{display:flex;flex-direction:column;gap:10px;align-items:center;margin-top:6px}
-#endTitle{font-size:34px;font-weight:900;letter-spacing:3px}
-#endTitle.win{color:#7dff9a;text-shadow:0 0 20px rgba(125,255,154,.5)}
-#endTitle.lose{color:#ff6b6b;text-shadow:0 0 20px rgba(255,107,107,.5)}
-#endSub{margin:8px 0 4px;color:#c9cde8;font-size:15px}
-#endScore{margin:8px 0;font-size:26px;font-weight:900;color:#ffd93d}
-#endStats{margin-bottom:20px;font-size:13px;color:#8b8fae}
+#endTitle{font-size:32px;font-weight:900;letter-spacing:3px}
+#endTitle.win{color:var(--green);text-shadow:0 0 22px rgba(74,222,128,.55)}
+#endTitle.lose{color:var(--red);text-shadow:0 0 22px rgba(255,107,107,.55)}
+#endSub{margin:8px 0 4px;color:#c6cbe8;font-size:14.5px}
+#endScore{margin:8px 0;font-size:26px;font-weight:900;color:var(--gold)}
+#endStats{margin-bottom:18px;font-size:12.5px;color:var(--dim)}
+
+/* ================= 帮助浮层 ================= */
+.helpbox{max-width:520px}
+.keys{display:grid;grid-template-columns:1fr 1fr;gap:4px 22px;text-align:left;font-size:12px;color:#c6cbe8;margin-bottom:16px}
+.keys .row{display:flex;align-items:center;gap:8px;padding:3px 0}
+.keys .kbd{min-width:22px}
+.keys .desc{color:var(--dim)}
 </style>
 </head>
 <body>
@@ -107,40 +175,75 @@ canvas{position:absolute;inset:0;width:832px;height:716px;display:block;backgrou
     <!-- 顶部 HUD -->
     <div id="hud" class="layer">
       <div class="hud-left">
-        <div class="stat"><span>🪙</span><b id="hudGold">200</b></div>
-        <div class="hpwrap"><span>❤️</span><div class="hpbar"><div id="hudHpFill"></div></div><span id="hudHpText">20/20</span></div>
+        <div class="stat" id="goldWrap"><span class="ico">🪙</span><b id="hudGold">200</b></div>
+        <div class="hpwrap"><span class="ico">❤️</span><div class="hpbar"><div id="hudHpFill"></div><div class="ticks"></div></div><span id="hudHpText">20/20</span></div>
       </div>
       <div class="hud-center">
         <div id="hudWave">第 1 / 20 波</div>
         <div id="hudPhase">准备中…</div>
+        <div id="wavePrev"></div>
       </div>
       <div class="hud-right">
-        <button class="btn" id="btnStrategy" title="切换索敌策略（快捷键 T）">🎯 最前</button>
+        <button class="btn icon" id="btnStrategy" title="切换索敌策略（T）">🎯<span id="stratName">最前</span></button>
         <button class="btn gold" id="btnEarly">⏩ 提前开始</button>
-        <button class="btn" id="btnMute" title="静音（M）">🔊</button>
-        <button class="btn" id="btnPause" title="暂停（P）">⏸</button>
+        <button class="btn icon" id="btnHelp" title="操作帮助（H）">❓</button>
+        <button class="btn icon" id="btnMute" title="静音（M）">🔊</button>
+        <button class="btn icon" id="btnPause" title="暂停（P）">⏸</button>
       </div>
+    </div>
+
+    <!-- 放置模式提示条 -->
+    <div id="placeBar" class="layer hidden">
+      <span>🛠️ 放置中：点击地图放置 · 右键 / ESC 取消</span>
+      <button class="btn red" id="btnCancelPlace">✕ 取消</button>
     </div>
 
     <!-- 建造栏 -->
     <div id="buildbar" class="layer">
-      <button class="buildbtn" id="btnBuild-arrow"><span class="b-key">1</span><span class="b-ico">🏹</span><span class="b-name">箭塔</span><span class="b-cost">🪙 60</span></button>
-      <button class="buildbtn" id="btnBuild-cannon"><span class="b-key">2</span><span class="b-ico">💣</span><span class="b-name">炮塔</span><span class="b-cost">🪙 110</span></button>
-      <button class="buildbtn" id="btnBuild-frost"><span class="b-key">3</span><span class="b-ico">❄️</span><span class="b-name">冰霜塔</span><span class="b-cost">🪙 90</span></button>
-      <button class="buildbtn" id="btnBuild-laser"><span class="b-key">4</span><span class="b-ico">⚡</span><span class="b-name">激光塔</span><span class="b-cost">🪙 160</span></button>
+      <button class="buildbtn" id="btnBuild-arrow">
+        <span class="b-key kbd">1</span>
+        <canvas class="tower-icon" id="icon-arrow" width="42" height="42"></canvas>
+        <span class="b-name">箭塔</span><span class="b-cost">🪙 60</span>
+        <span class="tooltip" id="tip-arrow"></span>
+      </button>
+      <button class="buildbtn" id="btnBuild-cannon">
+        <span class="b-key kbd">2</span>
+        <canvas class="tower-icon" id="icon-cannon" width="42" height="42"></canvas>
+        <span class="b-name">炮塔</span><span class="b-cost">🪙 110</span>
+        <span class="tooltip" id="tip-cannon"></span>
+      </button>
+      <button class="buildbtn" id="btnBuild-frost">
+        <span class="b-key kbd">3</span>
+        <canvas class="tower-icon" id="icon-frost" width="42" height="42"></canvas>
+        <span class="b-name">冰霜塔</span><span class="b-cost">🪙 90</span>
+        <span class="tooltip" id="tip-frost"></span>
+      </button>
+      <button class="buildbtn" id="btnBuild-laser">
+        <span class="b-key kbd">4</span>
+        <canvas class="tower-icon" id="icon-laser" width="42" height="42"></canvas>
+        <span class="b-name">激光塔</span><span class="b-cost">🪙 160</span>
+        <span class="tooltip" id="tip-laser"></span>
+      </button>
       <div class="bar-help">
-        放置后点击塔可选中 · 右键/ESC 取消放置<br>
-        U 升级 · S 出售 · 空格 提前开波<br>
-        索敌可切换：最前 / 最近 / 血量最高
+        1-4 选塔 · 右键/ESC 取消 · U 升级 · S 出售<br>
+        空格 提前开波 · T 切索敌 · P 暂停 · H 帮助<br>
+        不同难度的地图与路线各不相同！
       </div>
     </div>
 
     <!-- 选中塔信息面板 -->
     <div id="towerPanel" class="layer hidden">
+      <div class="p-head">
+        <canvas id="panelIcon" width="40" height="40"></canvas>
+        <div class="p-title">
+          <span class="nm"><span id="panelName">箭塔</span><span class="lv" id="panelLv">Lv.1/3</span></span>
+          <span class="stars" id="panelStars">★☆☆</span>
+        </div>
+      </div>
       <div id="panelBody"></div>
       <div class="p-btns">
-        <button class="btn gold" id="btnUpgrade">升级</button>
-        <button class="btn red" id="btnSell">出售</button>
+        <button class="btn gold" id="btnUpgrade"><span class="kbd">U</span><span id="btnUpgradeTxt">升级</span></button>
+        <button class="btn red" id="btnSell"><span class="kbd">S</span><span id="btnSellTxt">出售</span></button>
       </div>
     </div>
 
@@ -153,14 +256,26 @@ canvas{position:absolute;inset:0;width:832px;height:716px;display:block;backgrou
         <h1>🏰 像素塔防</h1>
         <div class="sub">PIXEL TOWER DEFENSE</div>
         <div class="diff-row">
-          <label class="diff"><input type="radio" name="diff" id="diff-easy" value="easy"><span>😊 简单</span></label>
-          <label class="diff"><input type="radio" name="diff" id="diff-normal" value="normal" checked><span>⚔️ 普通</span></label>
-          <label class="diff"><input type="radio" name="diff" id="diff-hard" value="hard"><span>🔥 困难</span></label>
+          <label class="diff"><input type="radio" name="diff" id="diff-easy" value="easy">
+            <canvas class="mini" id="mini-easy" width="104" height="60"></canvas>
+            <span class="diff-name">😊 简单</span>
+            <span class="diff-params" id="params-easy"></span>
+          </label>
+          <label class="diff"><input type="radio" name="diff" id="diff-normal" value="normal" checked>
+            <canvas class="mini" id="mini-normal" width="104" height="60"></canvas>
+            <span class="diff-name">⚔️ 普通</span>
+            <span class="diff-params" id="params-normal"></span>
+          </label>
+          <label class="diff"><input type="radio" name="diff" id="diff-hard" value="hard">
+            <canvas class="mini" id="mini-hard" width="104" height="60"></canvas>
+            <span class="diff-name">🔥 困难</span>
+            <span class="diff-params" id="params-hard"></span>
+          </label>
         </div>
         <button class="big" id="btnStart">开始游戏</button>
         <div class="help">
-          操作：1-4 选择塔 · 点击放置（绿=可放/红=不可放）· 右键或 ESC 取消放置<br>
-          U 升级 · S 出售 · P 暂停 · 空格 提前开始下一波 · T 切换索敌 · M 静音<br>
+          1-4 选择塔 · 点击放置（绿=可放/红=不可放）· 右键或 ESC 取消放置<br>
+          U 升级 · S 出售 · P 暂停 · 空格 提前开始下一波 · T 切换索敌 · M 静音 · H 帮助<br>
           共 20 波进攻，守住基地！
         </div>
       </div>
@@ -191,6 +306,26 @@ canvas{position:absolute;inset:0;width:832px;height:716px;display:block;backgrou
         </div>
       </div>
     </div>
+
+    <!-- 帮助浮层 -->
+    <div id="helpLayer" class="layer overlay hidden">
+      <div class="box helpbox">
+        <h2>📖 操作帮助</h2>
+        <div class="keys">
+          <div class="row"><span class="kbd">1</span><span class="kbd">2</span><span class="kbd">3</span><span class="kbd">4</span><span class="desc">选择 箭塔/炮塔/冰霜塔/激光塔</span></div>
+          <div class="row"><span class="kbd">U</span><span class="desc">升级选中的塔</span></div>
+          <div class="row"><span class="kbd">S</span><span class="desc">出售选中的塔（返还 60%）</span></div>
+          <div class="row"><span class="kbd">T</span><span class="desc">切换索敌策略</span></div>
+          <div class="row"><span class="kbd">P</span><span class="desc">暂停 / 继续</span></div>
+          <div class="row"><span class="kbd">空格</span><span class="desc">提前开始下一波（+金币）</span></div>
+          <div class="row"><span class="kbd">M</span><span class="desc">静音 / 取消静音</span></div>
+          <div class="row"><span class="kbd">ESC</span><span class="desc">取消放置 / 暂停</span></div>
+          <div class="row"><span class="kbd">右键</span><span class="desc">取消放置模式</span></div>
+          <div class="row"><span class="kbd">H</span><span class="desc">打开 / 关闭本帮助</span></div>
+        </div>
+        <button class="big blue" id="btnHelpClose">关闭</button>
+      </div>
+    </div>
   </div>
 </div>
 
@@ -205,19 +340,48 @@ const HUD_H = 44, BAR_H = 96;
 const W = MAP_W, H = MAP_H + HUD_H + BAR_H;   // 832 x 652
 const TOP = HUD_H;                            // 地图区 y 偏移
 
+// ============ 地图配置：三难度独立路径 ============
 // 路径路点（格子坐标；车道画在格线之间 → 路径恰好 2 格宽）
-// 5 条完整车道：右→下→左→下→右→下→左→下→右，终点为右下角基地，无重叠路段
-const WAYPOINTS = [
-  {x:-0.5, y:1.0}, {x:24.0, y:1.0}, {x:24.0, y:5.0}, {x:2.0, y:5.0},
-  {x:2.0, y:9.0}, {x:24.0, y:9.0}, {x:24.0, y:13.0}, {x:2.0, y:13.0},
-  {x:2.0, y:17.0}, {x:25.5, y:17.0}
-];
-const BASE_PT = {x:25.5, y:17.0};
-const W_PX = WAYPOINTS.map(w => ({x:w.x * CELL, y:TOP + w.y * CELL}));
-const BASE_PX = {x:BASE_PT.x * CELL, y:TOP + BASE_PT.y * CELL};
+const MAPS = {
+  easy: {
+    name: '简单路线', desc: '3 车道 · 短而直',
+    waypoints: [
+      {x:-0.5, y:1.0}, {x:24.0, y:1.0}, {x:24.0, y:5.0}, {x:2.0, y:5.0},
+      {x:2.0, y:9.0}, {x:25.5, y:9.0}
+    ],
+    base: {x:25.5, y:9.0},
+    theme: { gHue:115, gSat:48, gBase:40, pathEdge:'#5e4626', pathMid:'#a9885a', pathInner:'#d9b57e' }
+  },
+  normal: {
+    name: '标准路线', desc: '5 车道 · S 形',
+    waypoints: [
+      {x:-0.5, y:1.0}, {x:24.0, y:1.0}, {x:24.0, y:5.0}, {x:2.0, y:5.0},
+      {x:2.0, y:9.0}, {x:24.0, y:9.0}, {x:24.0, y:13.0}, {x:2.0, y:13.0},
+      {x:2.0, y:17.0}, {x:25.5, y:17.0}
+    ],
+    base: {x:25.5, y:17.0},
+    theme: { gHue:105, gSat:45, gBase:38, pathEdge:'#6b4f2c', pathMid:'#b08a5a', pathInner:'#d3b078' }
+  },
+  hard: {
+    name: '复杂路线', desc: '5 车道 · 间距交错 + 阶梯折返',
+    waypoints: [
+      {x:-0.5, y:1.0}, {x:24.0, y:1.0}, {x:24.0, y:4.0}, {x:2.0, y:4.0},
+      {x:2.0, y:7.0}, {x:10.0, y:7.0}, {x:10.0, y:9.0}, {x:18.0, y:9.0},
+      {x:18.0, y:7.0}, {x:24.0, y:7.0}, {x:24.0, y:11.0}, {x:2.0, y:11.0},
+      {x:2.0, y:15.0}, {x:25.5, y:15.0}
+    ],
+    base: {x:25.5, y:15.0},
+    theme: { gHue:30, gSat:35, gBase:32, pathEdge:'#4a3520', pathMid:'#7d5f3c', pathInner:'#a97f4d' }
+  }
+};
 
-// 路径格子（2 格宽光栅化）
-const pathGrid = Array.from({length:ROWS}, () => Array(COLS).fill(false));
+// 动态地图状态（随难度切换）
+let pathGrid = [];
+let W_PX = [];
+let BASE_PX = {x:0, y:0};
+let curMap = MAPS.normal;
+let decos = [];
+
 function distToSeg(px, py, ax, ay, bx, by){
   const dx = bx - ax, dy = by - ay;
   const len2 = dx*dx + dy*dy || 1;
@@ -226,12 +390,14 @@ function distToSeg(px, py, ax, ay, bx, by){
   const cx = ax + t*dx, cy = ay + t*dy;
   return Math.hypot(px-cx, py-cy);
 }
-(function buildPath(){
+// 路径格子（2 格宽光栅化）
+function buildPathGrid(waypoints){
+  const grid = Array.from({length:ROWS}, () => Array(COLS).fill(false));
   const STEP = 0.1;
   for (let cy = 0; cy < ROWS; cy++) for (let cx = 0; cx < COLS; cx++){
     const px = cx + 0.5, py = cy + 0.5;
-    for (let i = 0; i < WAYPOINTS.length - 1; i++){
-      const a = WAYPOINTS[i], b = WAYPOINTS[i+1];
+    for (let i = 0; i < waypoints.length - 1; i++){
+      const a = waypoints[i], b = waypoints[i+1];
       const segLen = Math.hypot(b.x-a.x, b.y-a.y);
       let d = Infinity;
       for (let t = 0; t <= segLen + STEP; t += STEP){
@@ -240,10 +406,31 @@ function distToSeg(px, py, ax, ay, bx, by){
         d = Math.min(d, Math.hypot(px-sx, py-sy));
         if (d <= 0.9) break;
       }
-      if (d <= 0.9){ pathGrid[cy][cx] = true; break; }
+      if (d <= 0.9){ grid[cy][cx] = true; break; }
     }
   }
-})();
+  return grid;
+}
+// 应用指定难度的地图（重建路径格 / 路点 / 基地 / 装饰）
+function applyMap(key){
+  const m = MAPS[key] || MAPS.normal;
+  curMap = m;
+  pathGrid = buildPathGrid(m.waypoints);
+  W_PX = m.waypoints.map(w => ({x:w.x * CELL, y:TOP + w.y * CELL}));
+  BASE_PX = {x:m.base.x * CELL, y:TOP + m.base.y * CELL};
+  buildDecos();
+}
+// 草地装饰（确定性随机，随地图重建）
+function buildDecos(){
+  decos = [];
+  for (let cy = 0; cy < ROWS; cy++) for (let cx = 0; cx < COLS; cx++){
+    if (pathGrid[cy][cx]) continue;
+    const v = hrand(cx * 131 + cy * 97);
+    const x = (cx + 0.5) * CELL, y = TOP + (cy + 0.5) * CELL;
+    if (v < 0.09) decos.push({x, y, kind:'tuft'});
+    else if (v < 0.115) decos.push({x, y, kind:'flower', c:['#ff8fb3','#ffe27a','#fff','#b39dff'][Math.floor(hrand(cx+cy*7)*4)]});
+  }
+}
 
 // 塔配置
 const TOWER_TYPES = {
@@ -293,9 +480,9 @@ const BOSS_WAVES = new Set([5, 10, 15, 20]);
 
 // 难度
 const DIFFS = {
-  easy:   {name:'简单', hp:0.70, speed:0.92, gold:1.25, baseHp:30, prep:20},
-  normal: {name:'普通', hp:1.0,  speed:1.0,  gold:1.0,  baseHp:20, prep:15},
-  hard:   {name:'困难', hp:1.12, speed:1.04, gold:0.92, baseHp:16, prep:12}
+  easy:   {name:'简单', map:'easy',   hp:0.60, speed:0.90, gold:1.40, baseHp:35, prep:25, hpK:0.22},
+  normal: {name:'普通', map:'normal', hp:1.0,  speed:1.0,  gold:1.0,  baseHp:20, prep:15, hpK:0.42},
+  hard:   {name:'困难', map:'hard',   hp:1.12, speed:1.04, gold:0.92, baseHp:16, prep:12, hpK:0.42}
 };
 
 const STRATS = ['furthest', 'nearest', 'strongest'];
@@ -459,18 +646,6 @@ let strategy = 'furthest', stratIdx = 0;
 let kills = 0, totalEarned = 0;
 let bossHeals = 0, bossSpawns = 0;
 let dayT = 0, shake = 0, redFlash = 0, gameTime = 0;
-
-// 草地装饰（确定性随机，预先计算）
-const decos = [];
-(function buildDeco(){
-  for (let cy = 0; cy < ROWS; cy++) for (let cx = 0; cx < COLS; cx++){
-    if (pathGrid[cy][cx]) continue;
-    const v = hrand(cx * 131 + cy * 97);
-    const x = (cx + 0.5) * CELL, y = TOP + (cy + 0.5) * CELL;
-    if (v < 0.09) decos.push({x, y, kind:'tuft'});
-    else if (v < 0.115) decos.push({x, y, kind:'flower', c:['#ff8fb3','#ffe27a','#fff','#b39dff'][Math.floor(hrand(cx+cy*7)*4)]});
-  }
-})();
 
 /* ============================================================
    5. DOM
@@ -745,7 +920,7 @@ function startWave(){
     }
   }
   queue.sort((a, b) => a.t - b.t);
-  waveHpScale = 1 + 0.42 * (waveIndex - 1);
+  waveHpScale = 1 + diff.hpK * (waveIndex - 1);
   waveSpdScale = Math.min(1.45, 1 + 0.03 * (waveIndex - 1));
   const isBoss = BOSS_WAVES.has(waveIndex);
   showBanner(isBoss ? ('⚠️ 第 ' + waveIndex + ' 波 · BOSS 来袭 ⚠️') : ('第 ' + waveIndex + ' 波来袭！'), isBoss);
@@ -784,6 +959,7 @@ function spawnEnemy(type){
 ============================================================ */
 function startGame(){
   AudioSys.init(); AudioSys.resume();
+  applyMap(diff.map);
   gold = 200; baseMax = diff.baseHp; baseHp = baseMax;
   waveIndex = 1; phase = 'intermission'; interT = diff.prep;
   queue = []; spawnElapsed = 0;
@@ -903,20 +1079,21 @@ function draw(){
 }
 
 function drawMap(){
+  const th = curMap.theme;
   // 草地
   for (let cy = 0; cy < ROWS; cy++) for (let cx = 0; cx < COLS; cx++){
-    const l = 38 + hrand(cx * 31 + cy * 57) * 12;
-    ctx.fillStyle = 'hsl(105,45%,' + l.toFixed(1) + '%)';
+    const l = th.gBase + hrand(cx * 31 + cy * 57) * 12;
+    ctx.fillStyle = 'hsl(' + th.gHue + ',' + th.gSat + '%,' + l.toFixed(1) + '%)';
     ctx.fillRect(cx * CELL, TOP + cy * CELL, CELL, CELL);
   }
   // 路径：深色描边 + 土路
   ctx.lineJoin = 'round'; ctx.lineCap = 'round';
-  ctx.strokeStyle = '#6b4f2c'; ctx.lineWidth = 30;
+  ctx.strokeStyle = th.pathEdge; ctx.lineWidth = 30;
   ctx.beginPath();
   for (let i = 0; i < W_PX.length; i++){ i ? ctx.lineTo(W_PX[i].x, W_PX[i].y) : ctx.moveTo(W_PX[i].x, W_PX[i].y); }
   ctx.stroke();
-  ctx.strokeStyle = '#b08a5a'; ctx.lineWidth = 22; ctx.stroke();
-  ctx.strokeStyle = '#d3b078'; ctx.lineWidth = 12; ctx.stroke();
+  ctx.strokeStyle = th.pathMid; ctx.lineWidth = 22; ctx.stroke();
+  ctx.strokeStyle = th.pathInner; ctx.lineWidth = 12; ctx.stroke();
   // 路径斑点
   for (let cy = 0; cy < ROWS; cy++) for (let cx = 0; cx < COLS; cx++){
     if (!pathGrid[cy][cx]) continue;
@@ -1310,6 +1487,13 @@ function drawRangeAndPreview(){
     ctx.globalAlpha = 0.6;
     drawTower(tmp);
     ctx.globalAlpha = 1;
+    // 造价提示
+    ctx.font = 'bold 10px "Courier New",monospace';
+    ctx.textAlign = 'center';
+    ctx.strokeStyle = 'rgba(0,0,0,0.8)'; ctx.lineWidth = 3;
+    ctx.strokeText('🪙' + T.cost, px, py + 27);
+    ctx.fillStyle = valid ? '#ffd93d' : '#ff6b6b';
+    ctx.fillText('🪙' + T.cost, px, py + 27);
   }
 }
 
@@ -1385,13 +1569,13 @@ function toggleMute(){
   refreshHUD();
 }
 
-cv.addEventListener('mousemove', e => {
+cv.addEventListener('pointermove', e => {
   mouse = toGame(e);
   hoverCell = cellAt(mouse.x, mouse.y);
 });
-cv.addEventListener('mousedown', e => {
+cv.addEventListener('pointerdown', e => {
   if (e.button === 2){ cancelPlace(); return; }
-  if (e.button !== 0) return;
+  if (e.button !== 0 && e.pointerType !== 'touch') return;
   if (gameState !== 'playing') return;
   if (!hoverCell) return;
   if (buildType) tryPlace(hoverCell);
@@ -1402,7 +1586,7 @@ cv.addEventListener('mousedown', e => {
     else $('towerPanel').classList.add('hidden');
   }
 });
-cv.addEventListener('mouseleave', () => { hoverCell = null; });
+cv.addEventListener('pointerleave', () => { hoverCell = null; });
 cv.addEventListener('contextmenu', e => e.preventDefault());
 
 window.addEventListener('keydown', e => {
@@ -1421,7 +1605,9 @@ window.addEventListener('keydown', e => {
   else if (k === 'p' || k === 'P') togglePause();
   else if (k === 'm' || k === 'M') toggleMute();
   else if (k === 't' || k === 'T') cycleStrategy();
+  else if (k === 'h' || k === 'H') toggleHelp();
   else if (k === 'Escape'){
+    if (!$('helpLayer').classList.contains('hidden')){ $('helpLayer').classList.add('hidden'); return; }
     if (buildType) cancelPlace();
     else if (gameState === 'paused') togglePause();
     else if (gameState === 'playing') togglePause();
@@ -1436,13 +1622,185 @@ document.addEventListener('visibilitychange', () => {
 });
 
 /* ============================================================
-   13. UI 绑定与刷新
+   13. UI 组件绘制（塔图标 / 敌人图标 / 迷你地图 / 下一波预览）
 ============================================================ */
+// 迷你塔图标（用于建造栏与选中面板）
+function drawTowerIcon(cvs, key, lv){
+  const ctx2 = cvs.getContext('2d');
+  const S = cvs.width;
+  ctx2.clearRect(0, 0, S, S);
+  ctx2.save();
+  ctx2.translate(S / 2, S / 2 + 2);
+  const l = lv || 0;
+  if (key === 'arrow'){
+    ctx2.fillStyle = '#6b4423';
+    rr(ctx2, -9 - l, -5 - l, 18 + l * 2, 13 + l * 2, 3); ctx2.fill();
+    ctx2.fillStyle = l >= 2 ? '#ffd93d' : '#3fa34d';
+    ctx2.beginPath(); ctx2.moveTo(-7, -6 - l); ctx2.lineTo(0, -14 - l); ctx2.lineTo(7, -6 - l); ctx2.closePath(); ctx2.fill();
+    ctx2.strokeStyle = '#d9c9a8'; ctx2.lineWidth = 2;
+    ctx2.beginPath(); ctx2.moveTo(3, 0); ctx2.lineTo(13 + l, 0); ctx2.stroke();
+    ctx2.fillStyle = '#eee';
+    ctx2.beginPath(); ctx2.moveTo(14 + l, 0); ctx2.lineTo(10 + l, -3); ctx2.lineTo(10 + l, 3); ctx2.closePath(); ctx2.fill();
+  } else if (key === 'cannon'){
+    ctx2.fillStyle = '#4a4e5a';
+    ctx2.beginPath(); ctx2.arc(0, 0, 8 + l, 0, 6.28); ctx2.fill();
+    ctx2.fillStyle = '#3a3e48';
+    rr(ctx2, -4, -3.5, 14 + l * 2, 7, 2); ctx2.fill();
+    ctx2.fillStyle = '#1c1e25';
+    rr(ctx2, 8 + l, -5, 5, 10, 2); ctx2.fill();
+    if (l >= 2){ ctx2.strokeStyle = '#ffd93d'; ctx2.lineWidth = 1.5; ctx2.strokeRect(-3, -5, 6, 10); }
+  } else if (key === 'frost'){
+    ctx2.fillStyle = '#5f8fc9';
+    rr(ctx2, -10 - l, -3, 20 + l * 2, 11, 4); ctx2.fill();
+    const nc = 3 + l;
+    for (let i = 0; i < nc; i++){
+      const a = -Math.PI / 2 + (i - (nc - 1) / 2) * 0.6;
+      const h = 6 + l * 2;
+      ctx2.fillStyle = i % 2 ? '#7fd6ff' : '#9fe8ff';
+      ctx2.beginPath();
+      ctx2.moveTo(Math.cos(a - 0.3) * 6, Math.sin(a - 0.3) * 6);
+      ctx2.lineTo(Math.cos(a) * (6 + h), Math.sin(a) * (6 + h));
+      ctx2.lineTo(Math.cos(a + 0.3) * 6, Math.sin(a + 0.3) * 6);
+      ctx2.closePath(); ctx2.fill();
+    }
+  } else {
+    ctx2.fillStyle = '#2f3340';
+    ctx2.beginPath(); ctx2.arc(0, 0, 8 + l * 1.4, 0, 6.28); ctx2.fill();
+    ctx2.fillStyle = '#00e5ff';
+    ctx2.beginPath(); ctx2.arc(0, 0, 3 + l, 0, 6.28); ctx2.fill();
+    if (l >= 2){ ctx2.strokeStyle = '#ffd93d'; ctx2.lineWidth = 1.5; ctx2.beginPath(); ctx2.arc(0, 0, 10 + l * 1.4, 0, 6.28); ctx2.stroke(); }
+  }
+  ctx2.restore();
+}
+// 迷你敌人图标（下一波预览）
+function drawEnemyIcon(cvs, key){
+  const ctx2 = cvs.getContext('2d');
+  const S = cvs.width;
+  ctx2.clearRect(0, 0, S, S);
+  ctx2.save();
+  ctx2.translate(S / 2, S / 2);
+  const T = ENEMY_TYPES[key];
+  ctx2.fillStyle = T.color;
+  if (key === 'fast'){
+    ctx2.beginPath();
+    ctx2.moveTo(5, 0); ctx2.lineTo(-4, -4); ctx2.lineTo(-4, 4); ctx2.closePath(); ctx2.fill();
+  } else if (key === 'heavy'){
+    ctx2.beginPath();
+    for (let i = 0; i < 6; i++){
+      const a = Math.PI / 6 + i * Math.PI / 3;
+      i ? ctx2.lineTo(Math.cos(a) * 5.5, Math.sin(a) * 5.5) : ctx2.moveTo(Math.cos(a) * 5.5, Math.sin(a) * 5.5);
+    }
+    ctx2.closePath(); ctx2.fill();
+  } else if (key === 'flying'){
+    ctx2.beginPath(); ctx2.arc(0, 0, 4, 0, 6.28); ctx2.fill();
+    ctx2.beginPath();
+    ctx2.moveTo(-2, -1); ctx2.lineTo(-7, -4); ctx2.lineTo(-6, 0); ctx2.closePath(); ctx2.fill();
+    ctx2.beginPath();
+    ctx2.moveTo(-2, 1); ctx2.lineTo(-7, 4); ctx2.lineTo(-6, 0); ctx2.closePath(); ctx2.fill();
+  } else if (key === 'boss'){
+    ctx2.beginPath(); ctx2.arc(0, 0, 5.5, 0, 6.28); ctx2.fill();
+    ctx2.fillStyle = '#ffd93d';
+    ctx2.beginPath(); ctx2.moveTo(-4, -4); ctx2.lineTo(-3, -7); ctx2.lineTo(-1, -4); ctx2.lineTo(0, -8); ctx2.lineTo(1, -4); ctx2.lineTo(3, -7); ctx2.lineTo(4, -4); ctx2.closePath(); ctx2.fill();
+  } else {
+    ctx2.beginPath(); ctx2.arc(0, 0, 4.5, 0, 6.28); ctx2.fill();
+  }
+  ctx2.restore();
+}
+// 迷你地图（难度卡片）
+function drawMiniMapPreviews(){
+  for (const key of ['easy', 'normal', 'hard']){
+    const cvs = $('mini-' + key);
+    if (!cvs) continue;
+    const ctx2 = cvs.getContext('2d');
+    const W2 = cvs.width, H2 = cvs.height;
+    const sc = Math.min(W2 / MAP_W, H2 / MAP_H);
+    const ox = (W2 - MAP_W * sc) / 2, oy = (H2 - MAP_H * sc) / 2;
+    ctx2.clearRect(0, 0, W2, H2);
+    const m = MAPS[key];
+    const th = m.theme;
+    // 草地
+    ctx2.fillStyle = 'hsl(' + th.gHue + ',' + th.gSat + '%,' + (th.gBase + 6) + '%)';
+    ctx2.fillRect(0, 0, W2, H2);
+    // 路径
+    ctx2.lineJoin = 'round'; ctx2.lineCap = 'round';
+    ctx2.strokeStyle = th.pathMid; ctx2.lineWidth = Math.max(2, 6 * sc);
+    ctx2.beginPath();
+    m.waypoints.forEach((w, i) => {
+      const x = ox + w.x * CELL * sc, y = oy + w.y * CELL * sc;
+      i ? ctx2.lineTo(x, y) : ctx2.moveTo(x, y);
+    });
+    ctx2.stroke();
+    // 起点与基地
+    ctx2.fillStyle = '#9b5de5';
+    ctx2.beginPath(); ctx2.arc(ox + m.waypoints[0].x * CELL * sc, oy + m.waypoints[0].y * CELL * sc, 2.2, 0, 6.28); ctx2.fill();
+    ctx2.fillStyle = '#ff5b5b';
+    ctx2.beginPath(); ctx2.arc(ox + m.base.x * CELL * sc, oy + m.base.y * CELL * sc, 2.6, 0, 6.28); ctx2.fill();
+  }
+  // 难度参数
+  for (const d of ['easy', 'normal', 'hard']){
+    const el = $('params-' + d);
+    if (el) el.textContent = '基地 ' + DIFFS[d].baseHp + ' ❤ · 敌血 ' + DIFFS[d].hp + '× · 金币 ' + DIFFS[d].gold + '×';
+  }
+}
+// 下一波 / 本波敌人预览（按波次缓存，避免每帧重建 DOM）
+let lastWavePrevKey = '';
+function renderWavePreview(){
+  const box = $('wavePrev');
+  const key = (gameState !== 'playing' ? 'x' : waveIndex) + ':' + phase;
+  if (key === lastWavePrevKey) return;
+  lastWavePrevKey = key;
+  if (gameState !== 'playing' || waveIndex > WAVES.length){
+    box.innerHTML = '';
+    return;
+  }
+  const w = WAVES[waveIndex - 1];
+  const label = phase === 'intermission' ? '下一波' : '本波';
+  let html = '<span style="font-size:10px;color:#98a0c5;font-weight:700;margin-right:2px">' + label + '</span>';
+  for (const [type, n] of w.comps){
+    html += '<span class="wp-item"><canvas id="wp-' + type + '" width="14" height="14"></canvas><b>×' + n + '</b></span>';
+  }
+  box.innerHTML = html;
+  for (const [type] of w.comps) drawEnemyIcon($('wp-' + type), type);
+}
+// 建造卡片 tooltip 内容
+function fillTooltips(){
+  for (const k of ['arrow', 'cannon', 'frost', 'laser']){
+    const T = TOWER_TYPES[k];
+    const s0 = T.lvls[0];
+    let stats;
+    if (k === 'laser') stats = 'DPS ' + s0.dps + ' · 射程 ' + s0.range;
+    else if (k === 'frost') stats = '伤害 ' + s0.dmg + ' · 减速 ' + Math.round(s0.slow * 100) + '%';
+    else if (k === 'cannon') stats = '伤害 ' + s0.dmg + ' · 溅射 ' + s0.splash;
+    else stats = '伤害 ' + s0.dmg + ' · 攻速 ' + s0.rate + '/s';
+    $('tip-' + k).innerHTML =
+      '<div class="t-name">' + T.name + '</div>' +
+      '<div class="t-desc">' + T.desc + '</div>' +
+      '<div class="t-stat">' + stats + ' · 射程 ' + s0.range + '<br>可对空：' + (T.antiAir ? '✔' : '✘') + ' · 3 级升级</div>';
+  }
+}
+function initUI(){
+  for (const k of ['arrow', 'cannon', 'frost', 'laser']) drawTowerIcon($('icon-' + k), k, 0);
+  fillTooltips();
+  drawMiniMapPreviews();
+}
+
+/* ============================================================
+   14. UI 刷新与事件
+=========================================================== */
+let lastGold = 200;
 function refreshHUD(){
-  $('hudGold').textContent = Math.floor(gold);
+  const g = Math.floor(gold);
+  $('hudGold').textContent = g;
+  if (g > lastGold){
+    const gw = $('goldWrap');
+    gw.classList.remove('pop');
+    void gw.offsetWidth;
+    gw.classList.add('pop');
+  }
+  lastGold = g;
   const pct = Math.max(0, baseHp / baseMax * 100);
   $('hudHpFill').style.width = pct.toFixed(1) + '%';
-  $('hudHpFill').style.background = pct > 50 ? '#4ade80' : pct > 25 ? '#fbbf24' : '#ef4444';
+  $('hudHpFill').style.background = pct > 50 ? 'linear-gradient(#5ee88c,#35b566)' : pct > 25 ? 'linear-gradient(#f6d365,#f0a63c)' : 'linear-gradient(#ff8a80,#e53935)';
   $('hudHpText').textContent = Math.max(0, baseHp) + '/' + baseMax;
   $('hudWave').textContent = '第 ' + Math.min(waveIndex, WAVES.length) + ' / ' + WAVES.length + ' 波';
   $('hudPhase').textContent = phase === 'intermission'
@@ -1450,14 +1808,16 @@ function refreshHUD(){
     : '战斗中 · 本波剩余 ' + remaining() + ' 个敌人';
   $('btnEarly').style.display = (phase === 'intermission' && gameState === 'playing') ? 'inline-block' : 'none';
   $('btnEarly').textContent = '⏩ 提前开始 (+' + (25 + 4 * waveIndex) + '金)';
-  $('btnStrategy').textContent = '🎯 ' + STRAT_NAMES[strategy];
+  $('stratName').textContent = STRAT_NAMES[strategy];
   $('btnMute').textContent = AudioSys.muted ? '🔇' : '🔊';
+  $('placeBar').classList.toggle('hidden', !(buildType && gameState === 'playing'));
   for (const k of ['arrow', 'cannon', 'frost', 'laser']){
     const b = $('btnBuild-' + k);
     b.classList.toggle('off', gold < TOWER_TYPES[k].cost);
     b.classList.toggle('sel', buildType === k);
   }
   cv.style.cursor = buildType ? 'crosshair' : 'default';
+  renderWavePreview();
 }
 function updatePanel(){
   const t = selTower;
@@ -1466,10 +1826,13 @@ function updatePanel(){
   const upCost = t.lv < ty.up.length ? ty.up[t.lv] : 0;
   const next = t.lv < ty.lvls.length - 1 ? ty.lvls[t.lv + 1] : null;
   const refund = Math.round(t.totalCost * 0.6);
+  drawTowerIcon($('panelIcon'), ty.key, t.lv);
+  $('panelName').textContent = ty.name;
+  $('panelLv').textContent = 'Lv.' + (t.lv + 1) + '/3';
+  $('panelStars').textContent = ['★☆☆', '★★☆', '★★★'][t.lv];
   let rows = '';
-  rows += '<div class="p-title">' + ty.name + ' <span class="lv">Lv.' + (t.lv + 1) + '/3</span></div>';
   if (ty.key === 'laser'){
-    rows += '<div class="p-row">伤害 <span>' + st.dps + '/秒（距离越远越高）</span></div>';
+    rows += '<div class="p-row">每秒伤害 <span>' + st.dps + '<span class="p-old">（距离越远越高）</span></span></div>';
     if (t.target && !t.target.dead){
       const d = Math.hypot(t.target.x - t.x, t.target.y - t.y);
       const mult = (0.7 + 1.3 * Math.min(1, d / st.range)).toFixed(2);
@@ -1483,16 +1846,26 @@ function updatePanel(){
   if (st.splash) rows += '<div class="p-row">溅射 <span>' + st.splash + '</span></div>';
   if (st.slow) rows += '<div class="p-row">减速 <span>' + Math.round(st.slow * 100) + '% · ' + st.slowDur + 's</span></div>';
   if (next){
-    const nd = ty.key === 'laser' ? (next.dps + '/秒') : next.dmg;
-    rows += '<div class="p-next">升级后：伤害 ' + (ty.key === 'laser' ? st.dps : st.dmg) + ' → ' + nd + '</div>';
+    const nd = ty.key === 'laser' ? next.dps : next.dmg;
+    const cd = ty.key === 'laser' ? st.dps : st.dmg;
+    rows += '<div class="p-row">升级后伤害 <span><span class="p-old">' + cd + '</span> <span class="p-arr">→</span> ' + nd + '</span></div>';
+    if (ty.key !== 'laser' && st.rate !== next.rate)
+      rows += '<div class="p-row">升级后攻速 <span><span class="p-old">' + st.rate + '</span> <span class="p-arr">→</span> ' + next.rate + '</span></div>';
+  } else {
+    rows += '<div class="p-next">已满级：属性全开</div>';
   }
   $('panelBody').innerHTML = rows;
   const ub = $('btnUpgrade');
-  if (t.lv >= ty.up.length){ ub.textContent = '已满级'; ub.disabled = true; }
-  else { ub.textContent = '升级 ' + upCost + '金'; ub.disabled = gold < upCost; }
-  const sb = $('btnSell');
-  sb.textContent = '出售 +' + refund + '金';
+  if (t.lv >= ty.up.length){ $('btnUpgradeTxt').textContent = '已满级'; ub.disabled = true; }
+  else { $('btnUpgradeTxt').textContent = '升级 ' + upCost + '金'; ub.disabled = gold < upCost; }
+  $('btnSellTxt').textContent = '出售 +' + refund + '金';
   $('towerPanel').classList.remove('hidden');
+}
+
+function toggleHelp(){
+  const h = $('helpLayer');
+  h.classList.toggle('hidden');
+  AudioSys.play('click');
 }
 
 for (const k of ['arrow', 'cannon', 'frost', 'laser'])
@@ -1501,6 +1874,9 @@ $('btnPause').addEventListener('click', togglePause);
 $('btnMute').addEventListener('click', toggleMute);
 $('btnStrategy').addEventListener('click', cycleStrategy);
 $('btnEarly').addEventListener('click', earlyStart);
+$('btnHelp').addEventListener('click', toggleHelp);
+$('btnHelpClose').addEventListener('click', toggleHelp);
+$('btnCancelPlace').addEventListener('click', cancelPlace);
 $('btnUpgrade').addEventListener('click', upgradeSelected);
 $('btnSell').addEventListener('click', sellSelected);
 $('btnPauseResume').addEventListener('click', togglePause);
@@ -1510,7 +1886,15 @@ $('btnEndRestart').addEventListener('click', startGame);
 $('btnEndMenu').addEventListener('click', toMenu);
 $('btnStart').addEventListener('click', startGame);
 for (const d of ['easy', 'normal', 'hard'])
-  $('diff-' + d).addEventListener('change', e => { if (e.target.checked) diff = DIFFS[e.target.value]; });
+  $('diff-' + d).addEventListener('change', e => {
+    if (e.target.checked){
+      diff = DIFFS[e.target.value];
+      applyMap(diff.map);          // 菜单中切换难度 → 背景即时显示所选地图
+      drawMiniMapPreviews();
+    }
+  });
+  applyMap('normal');
+  initUI();
 
 function showBanner(text, isBoss){
   const b = $('banner');
