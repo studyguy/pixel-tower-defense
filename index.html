@@ -10,9 +10,9 @@
 html,body{width:100%;height:100%;overflow:hidden;background:#0e0e18;overscroll-behavior:none;touch-action:none}
 body{font-family:'Segoe UI','PingFang SC','Hiragino Sans GB','Microsoft YaHei',sans-serif;color:#eee}
 #stage{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;background:radial-gradient(circle at 50% 35%,#232340,#0d0d17)}
-#wrap{position:relative;width:832px;height:652px;flex:none;transform-origin:center center;
+#wrap{position:relative;width:832px;height:716px;flex:none;transform-origin:center center;
   box-shadow:0 0 80px rgba(0,0,0,.7),0 0 0 2px #000;border-radius:10px;overflow:hidden}
-canvas{position:absolute;inset:0;width:832px;height:652px;display:block;background:#4f7d3b}
+canvas{position:absolute;inset:0;width:832px;height:716px;display:block;background:#4f7d3b}
 .layer{position:absolute}
 .hidden{display:none!important}
 
@@ -199,18 +199,20 @@ canvas{position:absolute;inset:0;width:832px;height:652px;display:block;backgrou
 /* ============================================================
    1. 配置与常量
 ============================================================ */
-const CELL = 32, COLS = 26, ROWS = 16;
+const CELL = 32, COLS = 26, ROWS = 18;
 const MAP_W = COLS * CELL, MAP_H = ROWS * CELL;
 const HUD_H = 44, BAR_H = 96;
 const W = MAP_W, H = MAP_H + HUD_H + BAR_H;   // 832 x 652
 const TOP = HUD_H;                            // 地图区 y 偏移
 
 // 路径路点（格子坐标；车道画在格线之间 → 路径恰好 2 格宽）
+// 5 条完整车道：右→下→左→下→右→下→左→下→右，终点为右下角基地，无重叠路段
 const WAYPOINTS = [
-  {x:-0.5, y:2.0}, {x:24.0, y:2.0}, {x:24.0, y:6.0}, {x:2.0, y:6.0},
-  {x:2.0, y:10.0}, {x:24.0, y:10.0}, {x:24.0, y:14.0}, {x:2.0, y:14.0}, {x:25.5, y:14.0}
+  {x:-0.5, y:1.0}, {x:24.0, y:1.0}, {x:24.0, y:5.0}, {x:2.0, y:5.0},
+  {x:2.0, y:9.0}, {x:24.0, y:9.0}, {x:24.0, y:13.0}, {x:2.0, y:13.0},
+  {x:2.0, y:17.0}, {x:25.5, y:17.0}
 ];
-const BASE_PT = {x:25.5, y:14.0};
+const BASE_PT = {x:25.5, y:17.0};
 const W_PX = WAYPOINTS.map(w => ({x:w.x * CELL, y:TOP + w.y * CELL}));
 const BASE_PX = {x:BASE_PT.x * CELL, y:TOP + BASE_PT.y * CELL};
 
@@ -261,7 +263,7 @@ const ENEMY_TYPES = {
   fast:   {name:'快速兵', hp:25,  speed:105, gold:10, leak:1, r:8,  color:'#f2b13c', shape:'tri'},
   heavy:  {name:'重甲兵', hp:150, speed:38,  gold:15, leak:3, r:13, color:'#4a6fa5', shape:'hex', slowResist:0.5},
   flying: {name:'飞行兵', hp:32,  speed:95,  gold:12, leak:1, r:9,  color:'#9b5de5', shape:'bat', flying:true},
-  boss:   {name:'Boss',   hp:2000,speed:35,  gold:200,leak:6, r:24, color:'#8d2f2f', shape:'boss', slowImmune:true, boss:true}
+  boss:   {name:'Boss',   hp:1550,speed:30,  gold:200,leak:5, r:24, color:'#8d2f2f', shape:'boss', slowImmune:true, boss:true}
 };
 
 // 20 波敌人组合 [类型, 数量]
@@ -489,6 +491,7 @@ class Enemy {
     const T = ENEMY_TYPES[key];
     this.key = key; this.name = T.name;
     this.maxHp = T.hp * hpScale * (summoned ? 0.5 : 1);
+    if (this.boss) this.maxHp *= (0.8 + 0.045 * waveIndex); // Boss 独立成长：波5×1.03 → 波20×1.7
     this.hp = this.maxHp;
     this.speed = T.speed * spdScale;
     this.gold = T.gold * (summoned ? 0.5 : 1);
@@ -539,7 +542,7 @@ class Enemy {
     this.bossSkillCount++;
     if (this.bossSkillCount % 2 === 1){
       // 回血
-      const heal = this.maxHp * 0.07;
+      const heal = this.maxHp * 0.04;
       this.hp = Math.min(this.maxHp, this.hp + heal);
       bossHeals++;
       addText(this.x, this.y - this.r - 16, '+' + Math.round(heal), '#7dff9a', 13);
@@ -547,9 +550,9 @@ class Enemy {
       AudioSys.play('heal');
     } else {
       // 召唤小怪（在 Boss 当前位置出生，与 Boss 走同一段剩余路径）
-      for (let i = 0; i < 3; i++){
+      for (let i = 0; i < 2; i++){
         const m = new Enemy('normal', waveHpScale, waveSpdScale, true);
-        m.x = this.x + (i - 0.5) * 14; m.y = this.y; m.wpIndex = this.wpIndex;
+        m.x = this.x + (i - 0.5) * 16; m.y = this.y; m.wpIndex = this.wpIndex;
         enemies.push(m);
         ring(m.x, m.y, 6, 26, 0.45, '#b06bff', 3);
       }
@@ -742,8 +745,8 @@ function startWave(){
     }
   }
   queue.sort((a, b) => a.t - b.t);
-  waveHpScale = 1 + 0.32 * (waveIndex - 1);
-  waveSpdScale = Math.min(1.35, 1 + 0.02 * (waveIndex - 1));
+  waveHpScale = 1 + 0.42 * (waveIndex - 1);
+  waveSpdScale = Math.min(1.45, 1 + 0.03 * (waveIndex - 1));
   const isBoss = BOSS_WAVES.has(waveIndex);
   showBanner(isBoss ? ('⚠️ 第 ' + waveIndex + ' 波 · BOSS 来袭 ⚠️') : ('第 ' + waveIndex + ' 波来袭！'), isBoss);
   AudioSys.play(isBoss ? 'bossWarn' : 'waveStart');
@@ -941,7 +944,7 @@ function drawMap(){
     }
   }
   // 出生点传送门
-  const px = 16, py = TOP + 48, pulse = 0.5 + 0.5 * Math.sin(gameTime * 3);
+  const px = 16, py = TOP + 32, pulse = 0.5 + 0.5 * Math.sin(gameTime * 3);
   ctx.fillStyle = '#1a1030';
   ctx.beginPath(); ctx.arc(px, py, 15, 0, 6.28); ctx.fill();
   ctx.strokeStyle = 'rgba(155,93,229,' + (0.45 + pulse * 0.4).toFixed(2) + ')';
