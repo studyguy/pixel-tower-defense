@@ -66,20 +66,25 @@ canvas#cv{position:absolute;inset:0;width:832px;height:716px;display:block;backg
 /* ================= 建造栏 ================= */
 #buildbar{bottom:0;left:0;right:0;height:98px;display:flex;align-items:center;gap:9px;padding:9px 12px;overflow:hidden;
   background:linear-gradient(#1c1f3a,#131527);border-top:2px solid #000;z-index:5;box-shadow:0 -2px 10px rgba(0,0,0,.4)}
-.buildbtn{width:144px;height:80px;position:relative;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1px;
+.buildbtn{width:104px;height:80px;position:relative;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1px;
   background:linear-gradient(#2a2e4e,#222542);border:2px solid var(--line);border-radius:10px;color:var(--text);
   cursor:pointer;font-family:inherit;transition:border-color .12s,box-shadow .12s,transform .06s;overflow:visible}
 .buildbtn:hover{border-color:#8f9bd6;box-shadow:0 0 14px rgba(143,155,214,.25)}
 .buildbtn.sel{border-color:var(--gold);background:linear-gradient(#4a4426,#3a351d);box-shadow:0 0 16px rgba(255,217,61,.4)}
 .buildbtn.off{opacity:.4;filter:grayscale(.5);pointer-events:none}
-.buildbtn .tower-icon{position:static;width:42px;height:42px;border:none;display:block;filter:drop-shadow(0 2px 2px rgba(0,0,0,.4))}
-.b-name{font-size:13.5px;font-weight:800;line-height:1.1}
-.b-cost{font-size:11.5px;color:var(--gold);font-weight:700}
+.buildbtn .tower-icon{position:static;width:36px;height:36px;border:none;display:block;filter:drop-shadow(0 2px 2px rgba(0,0,0,.4))}
+.b-name{font-size:11.5px;font-weight:800;line-height:1.1;white-space:nowrap}
+.b-cost{font-size:10.5px;color:var(--gold);font-weight:700}
 .buildbtn.off .b-cost{color:var(--red)}
-.b-key{position:absolute;top:4px;left:6px;z-index:2}
-.bar-help-btn{margin-left:auto;display:flex;align-items:center;gap:6px;padding:8px 14px;font-size:12px}
+.buildbtn.locked .b-cost{display:none}
+.b-key{position:absolute;top:3px;left:5px;z-index:2}
+.b-lock{display:none;font-size:10px;color:#ff9d8a;font-weight:800}
+.buildbtn.locked .b-lock{display:block}
+.buildbtn.locked{filter:grayscale(.85) brightness(.75);cursor:not-allowed}
+.buildbtn.locked:hover{border-color:#8a5a5a;box-shadow:0 0 10px rgba(255,107,107,.2)}
+.buildbtn.locked .tower-icon{opacity:.5}
 /* 建造卡片 tooltip */
-.tooltip{position:absolute;bottom:86px;left:50%;transform:translateX(-50%) translateY(6px);width:168px;z-index:9;
+.tooltip{position:absolute;bottom:86px;left:50%;transform:translateX(-50%) translateY(6px);width:150px;z-index:9;
   background:rgba(10,11,20,.97);border:1px solid var(--line);border-radius:8px;padding:7px 9px;text-align:left;
   opacity:0;pointer-events:none;transition:opacity .15s,transform .15s;box-shadow:0 6px 18px rgba(0,0,0,.6)}
 .buildbtn:hover .tooltip{opacity:1;transform:translateX(-50%) translateY(0)}
@@ -130,16 +135,6 @@ canvas#cv{position:absolute;inset:0;width:832px;height:716px;display:block;backg
   text-shadow:0 3px 0 #000,0 0 28px rgba(255,217,61,.45),0 0 60px rgba(255,217,61,.2)}
 .box .sub{color:#8f9bd6;font-size:12.5px;letter-spacing:5px;margin-bottom:20px}
 .box h2{font-size:24px;margin-bottom:14px}
-.diff-row{display:flex;justify-content:center;gap:12px;margin-bottom:20px}
-.diff{display:flex;flex-direction:column;align-items:center;gap:3px;padding:9px 18px;border-radius:12px;cursor:pointer;
-  font-size:13.5px;font-weight:800;background:linear-gradient(#20233d,#191c33);border:2px solid var(--line);color:#c6cbe8;
-  transition:border-color .12s,box-shadow .12s,transform .06s}
-.diff:hover{border-color:#8f9bd6}
-.diff input{display:none}
-.diff:has(input:checked){border-color:var(--gold);color:var(--gold);box-shadow:0 0 18px rgba(255,217,61,.3)}
-.diff-name{font-size:14px;display:flex;align-items:center;gap:5px}
-.diff-params{font-size:10px;color:var(--dim);font-weight:600;line-height:1.4;white-space:nowrap}
-.diff:has(input:checked) .diff-params{color:#d9c98a}
 .big{background:linear-gradient(#ffe27a,#e8b82c);color:#241a00;border:1px solid #000;border-bottom:4px solid #8a6510;
   border-radius:12px;padding:13px 56px;font-size:19px;font-weight:900;cursor:pointer;font-family:inherit;letter-spacing:5px;
   box-shadow:0 6px 22px rgba(255,217,61,.25);transition:filter .12s,transform .05s}
@@ -149,6 +144,13 @@ canvas#cv{position:absolute;inset:0;width:832px;height:716px;display:block;backg
 .big.red{background:linear-gradient(#e0604f,#b43f2f);color:#fff;border-bottom-color:#55160f;box-shadow:none}
 .big.green{background:linear-gradient(#4cc96f,#2e8b4f);color:#fff;border-bottom-color:#11401f;box-shadow:none}
 .menu-help-btn{margin-top:14px;display:flex;justify-content:center}
+/* 解锁提示 */
+#toast{position:absolute;bottom:106px;left:50%;transform:translateX(-50%);z-index:9;pointer-events:none;
+  background:linear-gradient(#3a3418,#2b2812);border:2px solid var(--gold);border-radius:14px;padding:8px 20px;
+  font-size:14px;font-weight:900;color:var(--gold);letter-spacing:1px;box-shadow:0 6px 24px rgba(0,0,0,.6);
+  opacity:0}
+#toast.show{animation:toastIn 2.6s ease forwards}
+@keyframes toastIn{0%{opacity:0;transform:translateX(-50%) translateY(10px) scale(.85)}12%{opacity:1;transform:translateX(-50%) scale(1)}80%{opacity:1}100%{opacity:0;transform:translateX(-50%) translateY(-8px)}}
 .menu-btns{display:flex;flex-direction:column;gap:10px;align-items:center;margin-top:6px}
 #endTitle{font-size:32px;font-weight:900;letter-spacing:3px}
 #endTitle.win{color:var(--green);text-shadow:0 0 22px rgba(74,222,128,.55)}
@@ -200,29 +202,53 @@ canvas#cv{position:absolute;inset:0;width:832px;height:716px;display:block;backg
     <div id="buildbar" class="layer">
       <button class="buildbtn" id="btnBuild-arrow">
         <span class="b-key kbd">1</span>
-        <canvas class="tower-icon" id="icon-arrow" width="42" height="42"></canvas>
+        <canvas class="tower-icon" id="icon-arrow" width="36" height="36"></canvas>
         <span class="b-name">箭塔</span><span class="b-cost">🪙 60</span>
+        <span class="b-lock">🔒 波1解锁</span>
         <span class="tooltip" id="tip-arrow"></span>
       </button>
       <button class="buildbtn" id="btnBuild-cannon">
         <span class="b-key kbd">2</span>
-        <canvas class="tower-icon" id="icon-cannon" width="42" height="42"></canvas>
+        <canvas class="tower-icon" id="icon-cannon" width="36" height="36"></canvas>
         <span class="b-name">炮塔</span><span class="b-cost">🪙 110</span>
+        <span class="b-lock">🔒 波3解锁</span>
         <span class="tooltip" id="tip-cannon"></span>
       </button>
       <button class="buildbtn" id="btnBuild-frost">
         <span class="b-key kbd">3</span>
-        <canvas class="tower-icon" id="icon-frost" width="42" height="42"></canvas>
+        <canvas class="tower-icon" id="icon-frost" width="36" height="36"></canvas>
         <span class="b-name">冰霜塔</span><span class="b-cost">🪙 90</span>
+        <span class="b-lock">🔒 波5解锁</span>
         <span class="tooltip" id="tip-frost"></span>
       </button>
-      <button class="buildbtn" id="btnBuild-laser">
+      <button class="buildbtn" id="btnBuild-poison">
         <span class="b-key kbd">4</span>
-        <canvas class="tower-icon" id="icon-laser" width="42" height="42"></canvas>
+        <canvas class="tower-icon" id="icon-poison" width="36" height="36"></canvas>
+        <span class="b-name">剧毒塔</span><span class="b-cost">🪙 120</span>
+        <span class="b-lock">🔒 波6解锁</span>
+        <span class="tooltip" id="tip-poison"></span>
+      </button>
+      <button class="buildbtn" id="btnBuild-laser">
+        <span class="b-key kbd">5</span>
+        <canvas class="tower-icon" id="icon-laser" width="36" height="36"></canvas>
         <span class="b-name">激光塔</span><span class="b-cost">🪙 160</span>
+        <span class="b-lock">🔒 波8解锁</span>
         <span class="tooltip" id="tip-laser"></span>
       </button>
-      <button class="btn icon bar-help-btn" id="btnHelpBar" title="操作帮助（H）">❓ 操作帮助</button>
+      <button class="buildbtn" id="btnBuild-chain">
+        <span class="b-key kbd">6</span>
+        <canvas class="tower-icon" id="icon-chain" width="36" height="36"></canvas>
+        <span class="b-name">闪电链塔</span><span class="b-cost">🪙 190</span>
+        <span class="b-lock">🔒 波10解锁</span>
+        <span class="tooltip" id="tip-chain"></span>
+      </button>
+      <button class="buildbtn" id="btnBuild-sniper">
+        <span class="b-key kbd">7</span>
+        <canvas class="tower-icon" id="icon-sniper" width="36" height="36"></canvas>
+        <span class="b-name">狙击塔</span><span class="b-cost">🪙 230</span>
+        <span class="b-lock">🔒 波13解锁</span>
+        <span class="tooltip" id="tip-sniper"></span>
+      </button>
     </div>
 
     <!-- 选中塔信息面板 -->
@@ -244,30 +270,20 @@ canvas#cv{position:absolute;inset:0;width:832px;height:716px;display:block;backg
     <!-- 波次横幅 -->
     <div id="banner"></div>
 
+    <!-- 解锁提示 -->
+    <div id="toast"></div>
+
     <!-- 开始菜单 -->
     <div id="menu" class="layer overlay">
       <div class="box">
         <h1>🏰 像素塔防</h1>
         <div class="sub">PIXEL TOWER DEFENSE</div>
-        <div class="diff-row">
-          <label class="diff"><input type="radio" name="diff" id="diff-easy" value="easy">
-            <span class="diff-name">😊 简单</span>
-            <span class="diff-params" id="params-easy"></span>
-          </label>
-          <label class="diff"><input type="radio" name="diff" id="diff-normal" value="normal" checked>
-            <span class="diff-name">⚔️ 普通</span>
-            <span class="diff-params" id="params-normal"></span>
-          </label>
-          <label class="diff"><input type="radio" name="diff" id="diff-hard" value="hard">
-            <span class="diff-name">🔥 困难</span>
-            <span class="diff-params" id="params-hard"></span>
-          </label>
-        </div>
+        <p style="font-size:15px;color:#c6cbe8;margin-bottom:18px;font-weight:700">准备好迎接 20 波进攻了吗？</p>
         <button class="big" id="btnStart">开始游戏</button>
         <div class="menu-help-btn">
           <button class="btn icon" id="btnMenuHelp">📖 操作帮助</button>
         </div>
-        <div class="help-tip" style="margin-top:8px;font-size:10.5px;color:#6f769e">共 20 波进攻 · 不同难度地图不同 · 随时按 H 查看帮助</div>
+        <div class="help-tip" style="margin-top:8px;font-size:10.5px;color:#6f769e">共 20 波进攻 · 塔随波次逐步解锁 · 随时按 H 查看帮助</div>
       </div>
     </div>
 
@@ -302,7 +318,7 @@ canvas#cv{position:absolute;inset:0;width:832px;height:716px;display:block;backg
       <div class="box helpbox">
         <h2>📖 操作帮助</h2>
         <div class="keys">
-          <div class="row"><span class="kbd">1</span><span class="kbd">2</span><span class="kbd">3</span><span class="kbd">4</span><span class="desc">选择 箭塔/炮塔/冰霜塔/激光塔</span></div>
+          <div class="row"><span class="kbd">1</span>~<span class="kbd">7</span><span class="desc">选择对应塔（随波次解锁）</span></div>
           <div class="row"><span class="kbd">U</span><span class="desc">升级选中的塔</span></div>
           <div class="row"><span class="kbd">S</span><span class="desc">出售选中的塔（返还 60%）</span></div>
           <div class="row"><span class="kbd">T</span><span class="desc">切换索敌策略</span></div>
@@ -333,15 +349,6 @@ const TOP = HUD_H;                            // 地图区 y 偏移
 // ============ 地图配置：三难度独立路径 ============
 // 路径路点（格子坐标；车道画在格线之间 → 路径恰好 2 格宽）
 const MAPS = {
-  easy: {
-    name: '简单路线', desc: '3 车道 · 短而直',
-    waypoints: [
-      {x:-0.5, y:1.0}, {x:24.0, y:1.0}, {x:24.0, y:5.0}, {x:2.0, y:5.0},
-      {x:2.0, y:9.0}, {x:25.5, y:9.0}
-    ],
-    base: {x:25.5, y:9.0},
-    theme: { gHue:115, gSat:48, gBase:40, pathEdge:'#5e4626', pathMid:'#a9885a', pathInner:'#d9b57e' }
-  },
   normal: {
     name: '标准路线', desc: '5 车道 · S 形',
     waypoints: [
@@ -351,17 +358,6 @@ const MAPS = {
     ],
     base: {x:25.5, y:17.0},
     theme: { gHue:105, gSat:45, gBase:38, pathEdge:'#6b4f2c', pathMid:'#b08a5a', pathInner:'#d3b078' }
-  },
-  hard: {
-    name: '复杂路线', desc: '5 车道 · 间距交错 + 阶梯折返',
-    waypoints: [
-      {x:-0.5, y:1.0}, {x:24.0, y:1.0}, {x:24.0, y:4.0}, {x:2.0, y:4.0},
-      {x:2.0, y:7.0}, {x:10.0, y:7.0}, {x:10.0, y:9.0}, {x:18.0, y:9.0},
-      {x:18.0, y:7.0}, {x:24.0, y:7.0}, {x:24.0, y:11.0}, {x:2.0, y:11.0},
-      {x:2.0, y:15.0}, {x:25.5, y:15.0}
-    ],
-    base: {x:25.5, y:15.0},
-    theme: { gHue:30, gSat:35, gBase:32, pathEdge:'#4a3520', pathMid:'#7d5f3c', pathInner:'#a97f4d' }
   }
 };
 
@@ -422,16 +418,22 @@ function buildDecos(){
   }
 }
 
-// 塔配置
+// 塔配置（unlockWave：达到该波次解锁）
 const TOWER_TYPES = {
-  arrow:  {key:'arrow',  name:'箭塔',   desc:'攻速快·单体·可对空', cost:60,  up:[40,70],   antiAir:true,  projSpeed:430,
+  arrow:  {key:'arrow',  name:'箭塔',   desc:'攻速快·单体·可对空',  cost:60,  up:[40,70],   unlockWave:1,  antiAir:true,  projSpeed:430,
            lvls:[{dmg:8,  rate:2.5, range:130}, {dmg:14, rate:3.0, range:150}, {dmg:22, rate:3.5, range:175}]},
-  cannon: {key:'cannon', name:'炮塔',   desc:'射程远·范围溅射',     cost:110, up:[70,120],  antiAir:false, projSpeed:240,
+  cannon: {key:'cannon', name:'炮塔',   desc:'射程远·范围溅射',      cost:110, up:[70,120],  unlockWave:3,  antiAir:false, projSpeed:240,
            lvls:[{dmg:26, rate:0.75, range:175, splash:60}, {dmg:40, rate:0.85, range:200, splash:70}, {dmg:62, rate:1.0, range:230, splash:80}]},
-  frost:  {key:'frost',  name:'冰霜塔', desc:'减速敌人·低伤害',     cost:90,  up:[60,100],  antiAir:false,
+  frost:  {key:'frost',  name:'冰霜塔', desc:'减速敌人·低伤害',      cost:90,  up:[60,100],  unlockWave:5,  antiAir:false,
            lvls:[{dmg:2,  rate:1.2, range:120, slow:0.35, slowDur:1.2}, {dmg:4, rate:1.4, range:140, slow:0.45, slowDur:1.6}, {dmg:6, rate:1.6, range:160, slow:0.55, slowDur:2.0}]},
-  laser:  {key:'laser',  name:'激光塔', desc:'持续射线·越远越强',   cost:160, up:[90,150],  antiAir:true,
-           lvls:[{dps:34, range:150}, {dps:52, range:170}, {dps:74, range:195}]}
+  poison: {key:'poison', name:'剧毒塔', desc:'持续中毒·可叠加',      cost:120, up:[80,130],  unlockWave:6,  antiAir:false, projSpeed:320,
+           lvls:[{poison:10, poisonDur:3.0, rate:0.8, range:130}, {poison:18, poisonDur:3.5, rate:0.9, range:145}, {poison:28, poisonDur:4.0, rate:1.0, range:160}]},
+  laser:  {key:'laser',  name:'激光塔', desc:'持续射线·越远越强',    cost:160, up:[90,150],  unlockWave:8,  antiAir:true,
+           lvls:[{dps:34, range:150}, {dps:52, range:170}, {dps:74, range:195}]},
+  chain:  {key:'chain',  name:'闪电链塔', desc:'连锁闪电·可对空',    cost:190, up:[110,170], unlockWave:10, antiAir:true,
+           lvls:[{dmg:60, rate:0.6, range:160, chainN:3, chainR:90}, {dmg:90, rate:0.7, range:180, chainN:4, chainR:100}, {dmg:130, rate:0.8, range:200, chainN:5, chainR:110}]},
+  sniper: {key:'sniper', name:'狙击塔', desc:'超远程·超高单体伤害',  cost:230, up:[150,230], unlockWave:13, antiAir:true, projSpeed:900,
+           lvls:[{dmg:160, rate:0.30, range:320}, {dmg:260, rate:0.33, range:360}, {dmg:380, rate:0.36, range:400}]}
 };
 
 // 敌人配置
@@ -468,12 +470,8 @@ const WAVES = [
 ];
 const BOSS_WAVES = new Set([5, 10, 15, 20]);
 
-// 难度
-const DIFFS = {
-  easy:   {name:'简单', map:'easy',   hp:0.60, speed:0.90, gold:1.40, baseHp:35, prep:25, hpK:0.22},
-  normal: {name:'普通', map:'normal', hp:1.0,  speed:1.0,  gold:1.0,  baseHp:20, prep:15, hpK:0.42},
-  hard:   {name:'困难', map:'hard',   hp:1.12, speed:1.04, gold:0.92, baseHp:16, prep:12, hpK:0.42}
-};
+// 标准难度配置（单难度模式）
+const CFG = {name:'标准', map:'normal', hp:1.0, speed:1.0, gold:1.0, baseHp:20, prep:15, hpK:0.42};
 
 const STRATS = ['furthest', 'nearest', 'strongest'];
 const STRAT_NAMES = {furthest:'最前', nearest:'最近', strongest:'血量最高'};
@@ -554,6 +552,10 @@ const AudioSys = {
       case 'leak':      this.tone(220, 0.3, 'sawtooth', 0.38, 0, -130); break;
       case 'sell':      this.tone(520, 0.1, 'triangle', 0.18, 0, -260); break;
       case 'deny':      this.tone(160, 0.12, 'square', 0.18); break;
+      case 'poison':    this.tone(500, 0.14, 'sine', 0.16, 0, -220); break;
+      case 'chain':     this.tone(1100, 0.08, 'sawtooth', 0.18); this.tone(700, 0.1, 'sawtooth', 0.14, 0.04); break;
+      case 'sniper':    this.tone(220, 0.16, 'square', 0.3, 0, -140); this.noise(0.08, 0.2, 1800); break;
+      case 'unlock':    this.tone(659, 0.09, 'square', 0.18); this.tone(880, 0.09, 'square', 0.18, 0.09); this.tone(1318, 0.16, 'square', 0.18, 0.18); break;
       case 'click':     this.tone(800, 0.05, 'square', 0.1); break;
       case 'heal':      this.tone(660, 0.15, 'sine', 0.18, 0, 220); break;
       case 'summon':    this.tone(300, 0.2, 'sawtooth', 0.22, 0, 200); break;
@@ -623,7 +625,6 @@ function rr(ctx, x, y, w, h, r){
    4. 全局状态
 ============================================================ */
 let gameState = 'menu';          // menu | playing | paused | over
-let diff = DIFFS.normal;
 let gold = 200, baseHp = 20, baseMax = 20;
 let waveIndex = 1;               // 下一波编号（1 起）
 let phase = 'intermission';      // intermission | wave
@@ -663,7 +664,7 @@ class Enemy {
     this.leak = T.leak; this.r = T.r; this.color = T.color; this.shape = T.shape;
     this.flying = !!T.flying; this.slowResist = T.slowResist || 0;
     this.boss = !!T.boss; this.slowImmune = !!T.slowImmune;
-    this.dead = false; this.flash = 0; this.slows = [];
+    this.dead = false; this.flash = 0; this.slows = []; this.poisons = [];
     this.summoned = !!summoned;
     this.bob = Math.random() * 6.28;
     this.x = W_PX[0].x; this.y = W_PX[0].y;
@@ -681,6 +682,16 @@ class Enemy {
     for (let i = this.slows.length - 1; i >= 0; i--){
       this.slows[i].t -= dt;
       if (this.slows[i].t <= 0) this.slows.splice(i, 1);
+    }
+    // 中毒持续伤害（按层叠加）
+    if (this.poisons.length){
+      let pd = 0;
+      for (let i = this.poisons.length - 1; i >= 0; i--){
+        this.poisons[i].t -= dt;
+        if (this.poisons[i].t <= 0) this.poisons.splice(i, 1);
+        else pd += this.poisons[i].dps;
+      }
+      if (pd > 0) this.takeDamage(pd * dt, 0.02);
     }
     const spd = this.speed * this.slowFactor;
     if (this.flying){
@@ -814,9 +825,39 @@ class Tower {
       ring(e.x, e.y, 4, 16, 0.3, '#9fe8ff', 2);
       addText(e.x, e.y - e.r - 6, Math.round(st.dmg), '#cdefff', 10);
       AudioSys.play('frost');
+    } else if (this.key === 'chain'){
+      // 闪电链：主目标 + 逐跳连锁（伤害逐跳 ×0.6）
+      const hit = [this.target];
+      this.target.takeDamage(st.dmg, 0.08);
+      addText(this.target.x, this.target.y - this.target.r - 6, Math.round(st.dmg), '#ffe27a', 11);
+      let prev = this.target, dmg = st.dmg;
+      const hitSet = new Set([this.target]);
+      for (let hop = 1; hop < st.chainN; hop++){
+        let best = null, bd = st.chainR;
+        for (const e of enemies){
+          if (e.dead || hitSet.has(e)) continue;
+          const d = Math.hypot(e.x - prev.x, e.y - prev.y);
+          if (d <= bd){ bd = d; best = e; }
+        }
+        if (!best) break;
+        hitSet.add(best);
+        dmg *= 0.6;
+        best.takeDamage(dmg, 0.08);
+        // 锯齿电弧
+        const mx = (prev.x + best.x) / 2 + (Math.random() - 0.5) * 26;
+        const my = (prev.y + best.y) / 2 + (Math.random() - 0.5) * 26;
+        beams.push({x1:prev.x, y1:prev.y, x2:mx, y2:my, t:0, life:0.14, color:'#7fe9ff'});
+        beams.push({x1:mx, y1:my, x2:best.x, y2:best.y, t:0, life:0.14, color:'#ffe27a'});
+        addText(best.x, best.y - best.r - 6, Math.round(dmg), '#ffe27a', 10);
+        prev = best;
+      }
+      AudioSys.play('chain');
     } else {
       projs.push(new Projectile(this));
-      AudioSys.play(this.key === 'cannon' ? 'cannon' : 'arrow');
+      if (this.key === 'cannon') AudioSys.play('cannon');
+      else if (this.key === 'sniper') AudioSys.play('sniper');
+      else if (this.key === 'poison') AudioSys.play('poison');
+      else AudioSys.play('arrow');
     }
   }
 }
@@ -832,6 +873,7 @@ class Projectile {
     this.speed = tower.type.projSpeed;
     this.dmg = st.dmg;
     this.splash = st.splash || 0;
+    this.poison = st.poison ? {dps: st.poison, dur: st.poisonDur} : null;
     this.key = tower.key;
     this.dead = false;
   }
@@ -861,6 +903,11 @@ class Projectile {
       if (e && !e.dead){
         e.takeDamage(this.dmg);
         addText(e.x, e.y - e.r - 6, Math.round(this.dmg), '#ffffff', 11);
+        if (this.poison && !e.flying){
+          e.poisons.push({dps: this.poison.dps, t: this.poison.dur});
+          if (e.poisons.length > 3) e.poisons.shift();
+          burst(e.x, e.y - e.r * 0.4, '#7dff7d', 5, 40, 0.35, 2);
+        }
       }
     }
   }
@@ -910,7 +957,7 @@ function startWave(){
     }
   }
   queue.sort((a, b) => a.t - b.t);
-  waveHpScale = 1 + diff.hpK * (waveIndex - 1);
+  waveHpScale = 1 + CFG.hpK * (waveIndex - 1);
   waveSpdScale = Math.min(1.45, 1 + 0.03 * (waveIndex - 1));
   const isBoss = BOSS_WAVES.has(waveIndex);
   showBanner(isBoss ? ('⚠️ 第 ' + waveIndex + ' 波 · BOSS 来袭 ⚠️') : ('第 ' + waveIndex + ' 波来袭！'), isBoss);
@@ -925,7 +972,7 @@ function clearWave(){
   AudioSys.play('upgrade');
   if (cleared >= WAVES.length){ gameOver(true); return; }
   waveIndex = cleared + 1;
-  phase = 'intermission'; interT = diff.prep;
+  phase = 'intermission'; interT = CFG.prep;
   if (BOSS_WAVES.has(waveIndex)){
     showBanner('⚠️ 警告：Boss 波即将来袭！⚠️', true);
     AudioSys.play('bossWarn');
@@ -949,14 +996,15 @@ function spawnEnemy(type){
 ============================================================ */
 function startGame(){
   AudioSys.init(); AudioSys.resume();
-  applyMap(diff.map);
-  gold = 200; baseMax = diff.baseHp; baseHp = baseMax;
-  waveIndex = 1; phase = 'intermission'; interT = diff.prep;
+  applyMap(CFG.map);
+  gold = 200; baseMax = CFG.baseHp; baseHp = baseMax;
+  waveIndex = 1; phase = 'intermission'; interT = CFG.prep;
   queue = []; spawnElapsed = 0;
   enemies = []; towers = []; projs = []; parts = []; rings = []; beams = []; texts = [];
   buildType = null; selTower = null;
   kills = 0; totalEarned = 0; bossHeals = 0; bossSpawns = 0;
   redFlash = 0; shake = 0; dayT = Math.random() * 120;
+  unlockedNotified.clear();
   gameState = 'playing';
   $('menu').classList.add('hidden');
   $('endScreen').classList.add('hidden');
@@ -1217,7 +1265,7 @@ function drawTower(t){
     ctx.strokeStyle = 'rgba(159,232,255,' + (0.3 + pulse * 0.4) + ')';
     ctx.lineWidth = 2;
     ctx.beginPath(); ctx.arc(0, 0, 15 + lv * 2, 0, 6.28); ctx.stroke();
-  } else { // laser
+  } else if (t.key === 'laser'){
     ctx.fillStyle = '#2f3340';
     ctx.beginPath(); ctx.arc(0, 0, 11 + lv * 1.5, 0, 6.28); ctx.fill();
     ctx.strokeStyle = '#16181f'; ctx.lineWidth = 2.5; ctx.stroke();
@@ -1231,6 +1279,59 @@ function drawTower(t){
       ctx.strokeStyle = lv >= 2 ? '#ffd93d' : '#00e5ff';
       ctx.lineWidth = 1.5;
       ctx.beginPath(); ctx.arc(0, 0, 12 + lv * 1.5, 0, 6.28); ctx.stroke();
+    }
+  } else if (t.key === 'poison'){
+    // 剧毒塔：坩埚 + 冒泡毒液
+    ctx.fillStyle = '#3a3f2a';
+    rr(ctx, -11 - lv, -7 - lv, 22 + lv * 2, 15 + lv * 2, 5); ctx.fill();
+    ctx.strokeStyle = '#1f2315'; ctx.lineWidth = 2; ctx.stroke();
+    ctx.fillStyle = '#4caf50';
+    ctx.beginPath(); ctx.ellipse(0, -4 - lv, 7 + lv, 4 + lv * 0.6, 0, 0, 6.28); ctx.fill();
+    const pulse = 0.5 + 0.5 * Math.sin(gameTime * 7);
+    ctx.fillStyle = 'rgba(160,255,160,' + (0.4 + pulse * 0.5) + ')';
+    ctx.beginPath();
+    ctx.arc(-4 - lv * 0.5, -8 - lv, 2, 0, 6.28);
+    ctx.arc(2 + lv * 0.5, -9 - lv, 1.5, 0, 6.28);
+    ctx.fill();
+    if (lv >= 1){
+      ctx.fillStyle = lv >= 2 ? '#ffd93d' : '#8bc34a';
+      ctx.fillRect(-2, -13 - lv, 4, 3);
+    }
+  } else if (t.key === 'chain'){
+    // 闪电链塔：金属柱 + 顶部电球
+    ctx.fillStyle = '#4a4a55';
+    rr(ctx, -6 - lv, -6 - lv, 12 + lv * 2, 18 + lv * 2, 3); ctx.fill();
+    ctx.strokeStyle = '#26262e'; ctx.lineWidth = 2; ctx.stroke();
+    ctx.strokeStyle = '#b06b3c'; ctx.lineWidth = 2.5;
+    ctx.beginPath();
+    ctx.moveTo(-4 - lv, 2 + lv); ctx.lineTo(-4 - lv, -2 - lv);
+    ctx.moveTo(4 + lv, 2 + lv); ctx.lineTo(4 + lv, -2 - lv);
+    ctx.moveTo(-5 - lv, -3 - lv); ctx.lineTo(5 + lv, -3 - lv);
+    ctx.stroke();
+    const pulse = 0.5 + 0.5 * Math.sin(gameTime * 9);
+    ctx.fillStyle = '#ffe27a';
+    ctx.beginPath(); ctx.arc(0, -8 - lv, 3.5 + lv * 0.8, 0, 6.28); ctx.fill();
+    ctx.strokeStyle = 'rgba(255,226,122,' + (0.35 + pulse * 0.5) + ')';
+    ctx.lineWidth = 1.5;
+    ctx.beginPath(); ctx.arc(0, -8 - lv, 6 + lv, 0, 6.28); ctx.stroke();
+  } else { // sniper
+    ctx.fillStyle = '#2e3138';
+    ctx.beginPath(); ctx.arc(0, 0, 9 + lv, 0, 6.28); ctx.fill();
+    ctx.strokeStyle = '#17191e'; ctx.lineWidth = 2.5; ctx.stroke();
+    ctx.save(); ctx.rotate(t.angle);
+    ctx.fillStyle = '#3d414a';
+    rr(ctx, -4, -3.5, 24 + lv * 5, 7, 3); ctx.fill();
+    ctx.strokeStyle = '#1c1e24'; ctx.lineWidth = 1.5; ctx.stroke();
+    ctx.fillStyle = '#14161a';
+    rr(ctx, 17 + lv * 4, -5.5, 6, 11, 2); ctx.fill();
+    // 瞄准镜
+    ctx.strokeStyle = lv >= 2 ? '#ffd93d' : '#7f8aa0';
+    ctx.lineWidth = 1.5;
+    ctx.beginPath(); ctx.arc(4, 0, 3.5, 0, 6.28); ctx.stroke();
+    ctx.restore();
+    if (lv >= 1){
+      ctx.fillStyle = '#7f8aa0';
+      ctx.beginPath(); ctx.arc(0, -12 - lv, 2.5, 0, 6.28); ctx.fill();
     }
   }
   // 等级星标
@@ -1338,6 +1439,15 @@ function drawEnemies(){
       ctx.beginPath(); ctx.arc(e.r + 1, -e.r + 4, 1.3, 0, 6.28); ctx.fill();
       ctx.beginPath(); ctx.arc(-e.r + 3, e.r + 2, 1.5, 0, 6.28); ctx.fill();
     }
+    // 中毒绿染
+    if (e.poisons.length){
+      ctx.fillStyle = 'rgba(90,220,90,0.35)';
+      ctx.beginPath(); ctx.arc(0, 0, e.r + 2, 0, 6.28); ctx.fill();
+      ctx.fillStyle = 'rgba(180,255,180,0.9)';
+      const bp = gameTime * 6;
+      ctx.beginPath(); ctx.arc(Math.sin(bp) * (e.r + 1), -e.r - 2, 1.5, 0, 6.28); ctx.fill();
+      ctx.beginPath(); ctx.arc(Math.cos(bp + 2) * (e.r + 1), e.r - 1, 1.2, 0, 6.28); ctx.fill();
+    }
     // 受击闪白
     if (e.flash > 0){
       ctx.fillStyle = 'rgba(255,255,255,' + Math.min(0.85, e.flash * 7).toFixed(2) + ')';
@@ -1372,6 +1482,22 @@ function drawProjectiles(){
       ctx.beginPath(); ctx.arc(p.x, p.y, 5, 0, 6.28); ctx.fill();
       ctx.fillStyle = '#8f8f9c';
       ctx.beginPath(); ctx.arc(p.x - 1.5, p.y - 1.5, 1.8, 0, 6.28); ctx.fill();
+    } else if (p.key === 'sniper'){
+      ctx.save();
+      ctx.translate(p.x, p.y);
+      ctx.rotate(Math.atan2(p.ty - p.y, p.tx - p.x));
+      ctx.strokeStyle = 'rgba(255,230,150,0.5)'; ctx.lineWidth = 1.5;
+      ctx.beginPath(); ctx.moveTo(-10, 0); ctx.lineTo(10, 0); ctx.stroke();
+      ctx.fillStyle = '#fff7d6';
+      ctx.beginPath(); ctx.arc(0, 0, 2, 0, 6.28); ctx.fill();
+      ctx.restore();
+    } else if (p.key === 'poison'){
+      ctx.fillStyle = 'rgba(120,255,120,0.4)';
+      ctx.beginPath(); ctx.arc(p.x, p.y, 7, 0, 6.28); ctx.fill();
+      ctx.fillStyle = '#4caf50';
+      ctx.beginPath(); ctx.arc(p.x, p.y, 4, 0, 6.28); ctx.fill();
+      ctx.fillStyle = '#a5ffa5';
+      ctx.beginPath(); ctx.arc(p.x - 1.2, p.y - 1.2, 1.4, 0, 6.28); ctx.fill();
     } else {
       ctx.save();
       ctx.translate(p.x, p.y);
@@ -1506,8 +1632,33 @@ function towerAt(cell){
   }
   return null;
 }
+function isUnlocked(key){
+  return waveIndex >= TOWER_TYPES[key].unlockWave;
+}
+const unlockedNotified = new Set();
+function notifyUnlocks(){
+  for (const k of Object.keys(TOWER_TYPES)){
+    if (unlockedNotified.has(k)) continue;
+    if (isUnlocked(k)){
+      unlockedNotified.add(k);
+      const T = TOWER_TYPES[k];
+      if (k !== 'arrow'){
+        showToast('🔓 新塔解锁：' + T.name + '！');
+        AudioSys.play('unlock');
+      }
+    }
+  }
+}
+function showToast(text){
+  const t = $('toast');
+  t.textContent = text;
+  t.classList.remove('show');
+  void t.offsetWidth;
+  t.classList.add('show');
+}
 function tryPlace(cell){
   const T = TOWER_TYPES[buildType];
+  if (!isUnlocked(buildType)){ showToast('🔒 ' + T.name + ' 需在第 ' + T.unlockWave + ' 波解锁'); AudioSys.play('deny'); return; }
   if (gold < T.cost){ AudioSys.play('deny'); return; }
   if (pathGrid[cell.cy][cell.cx]){ AudioSys.play('deny'); return; }
   if (towerAt(cell)){ AudioSys.play('deny'); return; }
@@ -1520,6 +1671,12 @@ function tryPlace(cell){
 function cancelPlace(){ buildType = null; refreshHUD(); }
 function setBuildType(key){
   if (gameState !== 'playing') return;
+  if (!isUnlocked(key)){
+    const T = TOWER_TYPES[key];
+    showToast('🔒 ' + T.name + ' 需在第 ' + T.unlockWave + ' 波解锁');
+    AudioSys.play('deny');
+    return;
+  }
   buildType = buildType === key ? null : key;
   selTower = null;
   $('towerPanel').classList.add('hidden');
@@ -1589,7 +1746,10 @@ window.addEventListener('keydown', e => {
   if (k === '1') setBuildType('arrow');
   else if (k === '2') setBuildType('cannon');
   else if (k === '3') setBuildType('frost');
-  else if (k === '4') setBuildType('laser');
+  else if (k === '4') setBuildType('poison');
+  else if (k === '5') setBuildType('laser');
+  else if (k === '6') setBuildType('chain');
+  else if (k === '7') setBuildType('sniper');
   else if (k === 'u' || k === 'U') upgradeSelected();
   else if (k === 's' || k === 'S') sellSelected();
   else if (k === 'p' || k === 'P') togglePause();
@@ -1653,6 +1813,35 @@ function drawTowerIcon(cvs, key, lv){
       ctx2.lineTo(Math.cos(a + 0.3) * 6, Math.sin(a + 0.3) * 6);
       ctx2.closePath(); ctx2.fill();
     }
+  } else if (key === 'poison'){
+    ctx2.fillStyle = '#3a3f2a';
+    rr(ctx2, -8 - l, -5 - l, 16 + l * 2, 11 + l * 2, 4); ctx2.fill();
+    ctx2.fillStyle = '#4caf50';
+    ctx2.beginPath(); ctx2.ellipse(0, -3 - l, 5 + l, 3 + l * 0.5, 0, 0, 6.28); ctx2.fill();
+    ctx2.fillStyle = 'rgba(160,255,160,.85)';
+    ctx2.beginPath(); ctx2.arc(-3, -7 - l, 1.6, 0, 6.28); ctx2.arc(2, -8 - l, 1.2, 0, 6.28); ctx2.fill();
+    if (l >= 2){ ctx2.fillStyle = '#ffd93d'; ctx2.fillRect(-2, -10 - l, 4, 2.5); }
+  } else if (key === 'chain'){
+    ctx2.fillStyle = '#4a4a55';
+    rr(ctx2, -5 - l, -4 - l, 10 + l * 2, 14 + l * 2, 3); ctx2.fill();
+    ctx2.strokeStyle = '#b06b3c'; ctx2.lineWidth = 2;
+    ctx2.beginPath();
+    ctx2.moveTo(-3 - l, 2); ctx2.lineTo(-3 - l, -2);
+    ctx2.moveTo(3 + l, 2); ctx2.lineTo(3 + l, -2);
+    ctx2.moveTo(-4 - l, -2); ctx2.lineTo(4 + l, -2);
+    ctx2.stroke();
+    ctx2.fillStyle = '#ffe27a';
+    ctx2.beginPath(); ctx2.arc(0, -6 - l, 3 + l * 0.7, 0, 6.28); ctx2.fill();
+  } else if (key === 'sniper'){
+    ctx2.fillStyle = '#2e3138';
+    ctx2.beginPath(); ctx2.arc(0, 0, 7 + l, 0, 6.28); ctx2.fill();
+    ctx2.fillStyle = '#3d414a';
+    rr(ctx2, -3, -2.5, 16 + l * 3, 5, 2); ctx2.fill();
+    ctx2.fillStyle = '#14161a';
+    rr(ctx2, 11 + l * 2, -4, 4.5, 8, 1.5); ctx2.fill();
+    ctx2.strokeStyle = l >= 2 ? '#ffd93d' : '#7f8aa0';
+    ctx2.lineWidth = 1.5;
+    ctx2.beginPath(); ctx2.arc(3, 0, 2.6, 0, 6.28); ctx2.stroke();
   } else {
     ctx2.fillStyle = '#2f3340';
     ctx2.beginPath(); ctx2.arc(0, 0, 8 + l * 1.4, 0, 6.28); ctx2.fill();
@@ -1696,13 +1885,6 @@ function drawEnemyIcon(cvs, key){
   }
   ctx2.restore();
 }
-// 难度卡片参数文字
-function setDiffParams(){
-  for (const d of ['easy', 'normal', 'hard']){
-    const el = $('params-' + d);
-    if (el) el.textContent = '基地 ' + DIFFS[d].baseHp + '❤ · 敌血 ' + DIFFS[d].hp + '× · 金币 ' + DIFFS[d].gold + '×';
-  }
-}
 // 下一波 / 本波敌人预览（按波次缓存，避免每帧重建 DOM）
 let lastWavePrevKey = '';
 function renderWavePreview(){
@@ -1732,17 +1914,19 @@ function fillTooltips(){
     if (k === 'laser') stats = 'DPS ' + s0.dps + ' · 射程 ' + s0.range;
     else if (k === 'frost') stats = '伤害 ' + s0.dmg + ' · 减速 ' + Math.round(s0.slow * 100) + '%';
     else if (k === 'cannon') stats = '伤害 ' + s0.dmg + ' · 溅射 ' + s0.splash;
+    else if (k === 'poison') stats = '毒 ' + s0.poison + '/秒 · 持续 ' + s0.poisonDur + 's';
+    else if (k === 'chain') stats = '伤害 ' + s0.dmg + ' · 连锁 ' + s0.chainN + ' 目标';
+    else if (k === 'sniper') stats = '伤害 ' + s0.dmg + ' · 超远程';
     else stats = '伤害 ' + s0.dmg + ' · 攻速 ' + s0.rate + '/s';
     $('tip-' + k).innerHTML =
       '<div class="t-name">' + T.name + '</div>' +
       '<div class="t-desc">' + T.desc + '</div>' +
-      '<div class="t-stat">' + stats + ' · 射程 ' + s0.range + '<br>可对空：' + (T.antiAir ? '✔' : '✘') + ' · 3 级升级</div>';
+      '<div class="t-stat">' + stats + ' · 射程 ' + s0.range + '<br>可对空：' + (T.antiAir ? '✔' : '✘') + ' · 第 ' + T.unlockWave + ' 波解锁</div>';
   }
 }
 function initUI(){
-  for (const k of ['arrow', 'cannon', 'frost', 'laser']) drawTowerIcon($('icon-' + k), k, 0);
+  for (const k of ['arrow', 'cannon', 'frost', 'poison', 'laser', 'chain', 'sniper']) drawTowerIcon($('icon-' + k), k, 0);
   fillTooltips();
-  setDiffParams();
 }
 
 /* ============================================================
@@ -1772,11 +1956,14 @@ function refreshHUD(){
   $('stratName').textContent = STRAT_NAMES[strategy];
   $('btnMute').textContent = AudioSys.muted ? '🔇' : '🔊';
   $('placeBar').classList.toggle('hidden', !(buildType && gameState === 'playing'));
-  for (const k of ['arrow', 'cannon', 'frost', 'laser']){
+  for (const k of ['arrow', 'cannon', 'frost', 'poison', 'laser', 'chain', 'sniper']){
     const b = $('btnBuild-' + k);
-    b.classList.toggle('off', gold < TOWER_TYPES[k].cost);
+    const T = TOWER_TYPES[k];
+    b.classList.toggle('locked', !isUnlocked(k));
+    b.classList.toggle('off', isUnlocked(k) && gold < T.cost);
     b.classList.toggle('sel', buildType === k);
   }
+  if (gameState === 'playing') notifyUnlocks();
   cv.style.cursor = buildType ? 'crosshair' : 'default';
   renderWavePreview();
 }
@@ -1799,6 +1986,14 @@ function updatePanel(){
       const mult = (0.7 + 1.3 * Math.min(1, d / st.range)).toFixed(2);
       rows += '<div class="p-row">当前倍率 <span>' + mult + '×</span></div>';
     }
+  } else if (ty.key === 'poison'){
+    rows += '<div class="p-row">毒伤害 <span>' + st.poison + '/秒 × ' + Math.min(3, st.poisonDur > 0 ? 3 : 0) + ' 层</span></div>';
+    rows += '<div class="p-row">中毒持续 <span>' + st.poisonDur + 's</span></div>';
+    rows += '<div class="p-row">攻速 <span>每秒 ' + st.rate + ' 次</span></div>';
+  } else if (ty.key === 'chain'){
+    rows += '<div class="p-row">伤害 <span>' + st.dmg + '（连锁逐跳 ×0.6）</span></div>';
+    rows += '<div class="p-row">连锁 <span>最多 ' + st.chainN + ' 个目标</span></div>';
+    rows += '<div class="p-row">攻速 <span>每秒 ' + st.rate + ' 次</span></div>';
   } else {
     rows += '<div class="p-row">伤害 <span>' + st.dmg + '</span></div>';
     rows += '<div class="p-row">攻速 <span>每秒 ' + st.rate + ' 次</span></div>';
@@ -1807,8 +2002,8 @@ function updatePanel(){
   if (st.splash) rows += '<div class="p-row">溅射 <span>' + st.splash + '</span></div>';
   if (st.slow) rows += '<div class="p-row">减速 <span>' + Math.round(st.slow * 100) + '% · ' + st.slowDur + 's</span></div>';
   if (next){
-    const nd = ty.key === 'laser' ? next.dps : next.dmg;
-    const cd = ty.key === 'laser' ? st.dps : st.dmg;
+    const nd = ty.key === 'laser' ? next.dps : ty.key === 'poison' ? next.poison : next.dmg;
+    const cd = ty.key === 'laser' ? st.dps : ty.key === 'poison' ? st.poison : st.dmg;
     rows += '<div class="p-row">升级后伤害 <span><span class="p-old">' + cd + '</span> <span class="p-arr">→</span> ' + nd + '</span></div>';
     if (ty.key !== 'laser' && st.rate !== next.rate)
       rows += '<div class="p-row">升级后攻速 <span><span class="p-old">' + st.rate + '</span> <span class="p-arr">→</span> ' + next.rate + '</span></div>';
@@ -1829,14 +2024,13 @@ function toggleHelp(){
   AudioSys.play('click');
 }
 
-for (const k of ['arrow', 'cannon', 'frost', 'laser'])
+for (const k of ['arrow', 'cannon', 'frost', 'poison', 'laser', 'chain', 'sniper'])
   $('btnBuild-' + k).addEventListener('click', () => setBuildType(k));
 $('btnPause').addEventListener('click', togglePause);
 $('btnMute').addEventListener('click', toggleMute);
 $('btnStrategy').addEventListener('click', cycleStrategy);
 $('btnEarly').addEventListener('click', earlyStart);
 $('btnHelp').addEventListener('click', toggleHelp);
-$('btnHelpBar').addEventListener('click', toggleHelp);
 $('btnMenuHelp').addEventListener('click', toggleHelp);
 $('btnHelpClose').addEventListener('click', toggleHelp);
 $('btnCancelPlace').addEventListener('click', cancelPlace);
@@ -1848,10 +2042,6 @@ $('btnPauseMenu').addEventListener('click', toMenu);
 $('btnEndRestart').addEventListener('click', startGame);
 $('btnEndMenu').addEventListener('click', toMenu);
 $('btnStart').addEventListener('click', startGame);
-for (const d of ['easy', 'normal', 'hard'])
-  $('diff-' + d).addEventListener('change', e => {
-    if (e.target.checked) diff = DIFFS[e.target.value];
-  });
   applyMap('normal');
   initUI();
 
