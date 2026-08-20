@@ -15,9 +15,9 @@
 html,body{width:100%;height:100%;overflow:hidden;background:var(--bg0);overscroll-behavior:none;touch-action:none}
 body{font-family:'Segoe UI','PingFang SC','Hiragino Sans GB','Microsoft YaHei',sans-serif;color:var(--text)}
 #stage{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;background:radial-gradient(circle at 50% 30%,#252550,#0a0a13)}
-#wrap{position:relative;width:832px;height:716px;flex:none;transform-origin:center center;
+#wrap{position:relative;width:832px;height:742px;flex:none;transform-origin:center center;
   box-shadow:0 0 90px rgba(0,0,0,.75),0 0 0 2px #000;border-radius:12px;overflow:hidden}
-canvas#cv{position:absolute;inset:0;width:832px;height:716px;display:block;background:#4f7d3b}
+canvas#cv{position:absolute;inset:0;width:832px;height:742px;display:block;background:#4f7d3b}
 .layer{position:absolute}
 .hidden{display:none!important}
 .kbd{display:inline-block;min-width:16px;padding:0 4px;border:1px solid var(--line);border-bottom-width:2px;border-radius:4px;
@@ -108,7 +108,7 @@ canvas#cv{position:absolute;inset:0;width:832px;height:716px;display:block;backg
 .p-btns .btn{flex:1;padding:8px 0;font-size:13px;display:flex;align-items:center;justify-content:center;gap:6px}
 
 /* ================= 波次横幅 ================= */
-#banner{top:80px;left:50%;transform:translateX(-50%);text-align:center;font-size:26px;font-weight:900;color:var(--gold);max-width:92%;
+#banner{position:absolute;top:98px;left:50%;transform:translateX(-50%);text-align:center;font-size:26px;font-weight:900;color:var(--gold);max-width:92%;
   letter-spacing:4px;text-shadow:0 2px 0 #000,0 0 22px rgba(255,217,61,.55);pointer-events:none;z-index:8;
   background:linear-gradient(90deg,transparent,rgba(12,14,26,.82) 18%,rgba(12,14,26,.82) 82%,transparent);
   padding:10px 30px;border-top:2px solid var(--gold-d);border-bottom:2px solid var(--gold-d);
@@ -137,10 +137,10 @@ canvas#cv{position:absolute;inset:0;width:832px;height:716px;display:block;backg
 .big.green{background:linear-gradient(#4cc96f,#2e8b4f);color:#fff;border-bottom-color:#11401f;box-shadow:none}
 .menu-help-btn{margin-top:14px;display:flex;justify-content:center}
 /* ================= 第二层信息条 ================= */
-#subbar{top:48px;left:50%;transform:translateX(-50%);display:flex;align-items:center;gap:10px;z-index:5;
-  height:26px;padding:0 12px;border-radius:13px;pointer-events:none;
-  background:linear-gradient(rgba(22,24,42,.94),rgba(15,16,30,.94));border:1px solid var(--line);
-  box-shadow:0 3px 10px rgba(0,0,0,.45)}
+#subbar{top:46px;left:0;right:0;height:24px;display:flex;align-items:center;justify-content:center;gap:12px;z-index:5;
+  padding:0 12px;pointer-events:none;
+  background:linear-gradient(#232645,#1a1d36);border-bottom:2px solid #000;
+  box-shadow:0 2px 6px rgba(0,0,0,.35)}
 #subbar .btn{pointer-events:auto;padding:2px 12px;font-size:11.5px}
 #subbar #btnEarly{display:none;animation:pulse 1.1s ease infinite}
 #placeHint{font-size:11.5px;font-weight:700;color:var(--gold)}
@@ -348,9 +348,8 @@ canvas#cv{position:absolute;inset:0;width:832px;height:716px;display:block;backg
 ============================================================ */
 const CELL = 32, COLS = 26, ROWS = 18;
 const MAP_W = COLS * CELL, MAP_H = ROWS * CELL;
-const HUD_H = 44, BAR_H = 96;
-const W = MAP_W, H = MAP_H + HUD_H + BAR_H;   // 832 x 652
-const TOP = HUD_H;                            // 地图区 y 偏移
+const TOP = 70, BAR_H = 96;                 // 地图区 y 偏移（46 HUD + 24 信息带）
+const W = MAP_W, H = MAP_H + TOP + BAR_H;   // 832 x 742
 
 // ============ 地图配置：三难度独立路径 ============
 // 路径路点（格子坐标；车道画在格线之间 → 路径恰好 2 格宽）
