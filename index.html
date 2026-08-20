@@ -208,7 +208,7 @@ const TOP = HUD_H;                            // 地图区 y 偏移
 // 路径路点（格子坐标；车道画在格线之间 → 路径恰好 2 格宽）
 const WAYPOINTS = [
   {x:-0.5, y:2.0}, {x:24.0, y:2.0}, {x:24.0, y:6.0}, {x:2.0, y:6.0},
-  {x:2.0, y:10.0}, {x:24.0, y:10.0}, {x:24.0, y:14.0}, {x:25.5, y:14.0}
+  {x:2.0, y:10.0}, {x:24.0, y:10.0}, {x:24.0, y:14.0}, {x:2.0, y:14.0}, {x:25.5, y:14.0}
 ];
 const BASE_PT = {x:25.5, y:14.0};
 const W_PX = WAYPOINTS.map(w => ({x:w.x * CELL, y:TOP + w.y * CELL}));
@@ -248,20 +248,20 @@ const TOWER_TYPES = {
   arrow:  {key:'arrow',  name:'箭塔',   desc:'攻速快·单体·可对空', cost:60,  up:[40,70],   antiAir:true,  projSpeed:430,
            lvls:[{dmg:8,  rate:2.5, range:130}, {dmg:14, rate:3.0, range:150}, {dmg:22, rate:3.5, range:175}]},
   cannon: {key:'cannon', name:'炮塔',   desc:'射程远·范围溅射',     cost:110, up:[70,120],  antiAir:false, projSpeed:240,
-           lvls:[{dmg:22, rate:0.7, range:170, splash:55}, {dmg:36, rate:0.85, range:195, splash:64}, {dmg:55, rate:1.0, range:225, splash:74}]},
+           lvls:[{dmg:26, rate:0.75, range:175, splash:60}, {dmg:40, rate:0.85, range:200, splash:70}, {dmg:62, rate:1.0, range:230, splash:80}]},
   frost:  {key:'frost',  name:'冰霜塔', desc:'减速敌人·低伤害',     cost:90,  up:[60,100],  antiAir:false,
            lvls:[{dmg:2,  rate:1.2, range:120, slow:0.35, slowDur:1.2}, {dmg:4, rate:1.4, range:140, slow:0.45, slowDur:1.6}, {dmg:6, rate:1.6, range:160, slow:0.55, slowDur:2.0}]},
-  laser:  {key:'laser',  name:'激光塔', desc:'持续射线·越远越强',   cost:160, up:[100,170], antiAir:true,
-           lvls:[{dps:16, range:150}, {dps:26, range:170}, {dps:40, range:195}]}
+  laser:  {key:'laser',  name:'激光塔', desc:'持续射线·越远越强',   cost:160, up:[90,150],  antiAir:true,
+           lvls:[{dps:34, range:150}, {dps:52, range:170}, {dps:74, range:195}]}
 };
 
 // 敌人配置
 const ENEMY_TYPES = {
   normal: {name:'普通兵', hp:40,  speed:60,  gold:8,  leak:1, r:10, color:'#e5533d', shape:'circle'},
   fast:   {name:'快速兵', hp:25,  speed:105, gold:10, leak:1, r:8,  color:'#f2b13c', shape:'tri'},
-  heavy:  {name:'重甲兵', hp:150, speed:38,  gold:15, leak:2, r:13, color:'#4a6fa5', shape:'hex', slowResist:0.5},
+  heavy:  {name:'重甲兵', hp:150, speed:38,  gold:15, leak:3, r:13, color:'#4a6fa5', shape:'hex', slowResist:0.5},
   flying: {name:'飞行兵', hp:32,  speed:95,  gold:12, leak:1, r:9,  color:'#9b5de5', shape:'bat', flying:true},
-  boss:   {name:'Boss',   hp:1600,speed:30,  gold:200,leak:5, r:24, color:'#8d2f2f', shape:'boss', slowImmune:true, boss:true}
+  boss:   {name:'Boss',   hp:2000,speed:35,  gold:200,leak:6, r:24, color:'#8d2f2f', shape:'boss', slowImmune:true, boss:true}
 };
 
 // 20 波敌人组合 [类型, 数量]
@@ -271,17 +271,17 @@ const WAVES = [
   {comps:[['fast',8]]},
   {comps:[['normal',10],['heavy',3]]},
   {comps:[['boss',1],['normal',8]]},
-  {comps:[['fast',12],['flying',4]]},
+  {comps:[['fast',12],['flying',6]]},
   {comps:[['heavy',8],['normal',6]]},
   {comps:[['flying',10],['fast',6]]},
   {comps:[['normal',12],['heavy',6],['fast',6]]},
   {comps:[['boss',1],['flying',8],['normal',10]]},
   {comps:[['heavy',12],['flying',8]]},
-  {comps:[['fast',16],['normal',10]]},
+  {comps:[['fast',18],['normal',12]]},
   {comps:[['flying',14],['heavy',8],['fast',8]]},
   {comps:[['normal',16],['heavy',10],['flying',8]]},
   {comps:[['boss',1],['fast',14],['flying',10],['heavy',6]]},
-  {comps:[['flying',18],['fast',14]]},
+  {comps:[['flying',20],['fast',16]]},
   {comps:[['heavy',16],['normal',14],['flying',10]]},
   {comps:[['fast',20],['flying',14],['heavy',10]]},
   {comps:[['normal',20],['heavy',14],['flying',12],['fast',10]]},
@@ -291,9 +291,9 @@ const BOSS_WAVES = new Set([5, 10, 15, 20]);
 
 // 难度
 const DIFFS = {
-  easy:   {name:'简单', hp:0.8,  speed:0.92, gold:1.2,  baseHp:30, prep:20},
+  easy:   {name:'简单', hp:0.70, speed:0.92, gold:1.25, baseHp:30, prep:20},
   normal: {name:'普通', hp:1.0,  speed:1.0,  gold:1.0,  baseHp:20, prep:15},
-  hard:   {name:'困难', hp:1.28, speed:1.08, gold:0.85, baseHp:12, prep:12}
+  hard:   {name:'困难', hp:1.12, speed:1.04, gold:0.92, baseHp:16, prep:12}
 };
 
 const STRATS = ['furthest', 'nearest', 'strongest'];
@@ -539,21 +539,19 @@ class Enemy {
     this.bossSkillCount++;
     if (this.bossSkillCount % 2 === 1){
       // 回血
-      const heal = this.maxHp * 0.05;
+      const heal = this.maxHp * 0.07;
       this.hp = Math.min(this.maxHp, this.hp + heal);
       bossHeals++;
       addText(this.x, this.y - this.r - 16, '+' + Math.round(heal), '#7dff9a', 13);
       burst(this.x, this.y, '#7dff9a', 7, 70, 0.55, 2.5);
       AudioSys.play('heal');
     } else {
-      // 召唤小怪
-      const idx = Math.min(this.wpIndex + 1, W_PX.length - 2);
-      const pt = W_PX[idx];
-      for (let i = 0; i < 2; i++){
+      // 召唤小怪（在 Boss 当前位置出生，与 Boss 走同一段剩余路径）
+      for (let i = 0; i < 3; i++){
         const m = new Enemy('normal', waveHpScale, waveSpdScale, true);
-        m.x = pt.x + (i - 0.5) * 12; m.y = pt.y; m.wpIndex = idx;
+        m.x = this.x + (i - 0.5) * 14; m.y = this.y; m.wpIndex = this.wpIndex;
         enemies.push(m);
-        ring(pt.x, pt.y, 6, 26, 0.45, '#b06bff', 3);
+        ring(m.x, m.y, 6, 26, 0.45, '#b06bff', 3);
       }
       bossSpawns++;
       addText(this.x, this.y - this.r - 16, '召唤小怪！', '#c98bff', 13);
@@ -615,7 +613,7 @@ class Tower {
     if (this.key === 'laser'){
       if (this.target){
         const d = Math.hypot(this.target.x - this.x, this.target.y - this.y);
-        const dps = st.dps * (0.7 + 0.8 * Math.min(1, d / st.range));
+        const dps = st.dps * (0.7 + 1.3 * Math.min(1, d / st.range));
         const dmg = dps * dt;
         this.target.takeDamage(dmg, 0.03);
         this.beamT = 0.06;
@@ -744,7 +742,7 @@ function startWave(){
     }
   }
   queue.sort((a, b) => a.t - b.t);
-  waveHpScale = 1 + 0.16 * (waveIndex - 1);
+  waveHpScale = 1 + 0.32 * (waveIndex - 1);
   waveSpdScale = Math.min(1.35, 1 + 0.02 * (waveIndex - 1));
   const isBoss = BOSS_WAVES.has(waveIndex);
   showBanner(isBoss ? ('⚠️ 第 ' + waveIndex + ' 波 · BOSS 来袭 ⚠️') : ('第 ' + waveIndex + ' 波来袭！'), isBoss);
@@ -753,7 +751,7 @@ function startWave(){
 function clearWave(){
   if (gameState !== 'playing') return;
   const cleared = waveIndex;
-  const bonus = 50 + 10 * cleared;
+  const bonus = 40 + 8 * cleared;
   gold += bonus; totalEarned += bonus;
   addText(W / 2, TOP + 70, '第 ' + cleared + ' 波清除！ +' + bonus + '金', '#ffd93d', 17);
   AudioSys.play('upgrade');
@@ -767,7 +765,7 @@ function clearWave(){
 }
 function earlyStart(){
   if (phase !== 'intermission' || gameState !== 'playing') return;
-  const bonus = 30 + 5 * waveIndex;
+  const bonus = 25 + 4 * waveIndex;
   gold += bonus; totalEarned += bonus;
   addText(W / 2, TOP + 70, '提前开始！ +' + bonus + '金', '#ffd93d', 17);
   startWave();
@@ -1448,7 +1446,7 @@ function refreshHUD(){
     ? '准备时间 ' + Math.ceil(Math.max(0, interT)) + 's · 下一波：第 ' + Math.min(waveIndex, WAVES.length) + ' 波'
     : '战斗中 · 本波剩余 ' + remaining() + ' 个敌人';
   $('btnEarly').style.display = (phase === 'intermission' && gameState === 'playing') ? 'inline-block' : 'none';
-  $('btnEarly').textContent = '⏩ 提前开始 (+' + (30 + 5 * waveIndex) + '金)';
+  $('btnEarly').textContent = '⏩ 提前开始 (+' + (25 + 4 * waveIndex) + '金)';
   $('btnStrategy').textContent = '🎯 ' + STRAT_NAMES[strategy];
   $('btnMute').textContent = AudioSys.muted ? '🔇' : '🔊';
   for (const k of ['arrow', 'cannon', 'frost', 'laser']){
@@ -1469,6 +1467,11 @@ function updatePanel(){
   rows += '<div class="p-title">' + ty.name + ' <span class="lv">Lv.' + (t.lv + 1) + '/3</span></div>';
   if (ty.key === 'laser'){
     rows += '<div class="p-row">伤害 <span>' + st.dps + '/秒（距离越远越高）</span></div>';
+    if (t.target && !t.target.dead){
+      const d = Math.hypot(t.target.x - t.x, t.target.y - t.y);
+      const mult = (0.7 + 1.3 * Math.min(1, d / st.range)).toFixed(2);
+      rows += '<div class="p-row">当前倍率 <span>' + mult + '×</span></div>';
+    }
   } else {
     rows += '<div class="p-row">伤害 <span>' + st.dmg + '</span></div>';
     rows += '<div class="p-row">攻速 <span>每秒 ' + st.rate + ' 次</span></div>';
