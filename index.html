@@ -753,6 +753,7 @@ class Enemy {
     if (baseHp <= 0){ baseHp = 0; gameOver(false); }
   }
   takeDamage(d, flash){
+    if (!(d > 0)) return;   // 防御：非法伤害（NaN/undefined）直接忽略
     this.hp -= d; this.flash = flash === undefined ? 0.08 : flash;
     if (this.hp <= 0 && !this.dead){
       this.dead = true;
@@ -877,7 +878,7 @@ class Projectile {
     this.trailX = this.x; this.trailY = this.y;
     this.target = tower.target;
     this.speed = tower.type.projSpeed;
-    this.dmg = st.dmg;
+    this.dmg = st.dmg || 0;
     this.splash = st.splash || 0;
     this.poison = st.poison ? {dps: st.poison, dur: st.poisonDur} : null;
     this.key = tower.key;
@@ -899,7 +900,7 @@ class Projectile {
       AudioSys.play('boom');
       for (const e of enemies){
         if (e.dead || e.flying) continue;
-        if (Math.hypot(e.x - this.x, e.y - this.y) <= this.splash + e.r * 0.5){
+        if (Math.hypot(e.x - this.x, e.y - this.y) <= this.splash + e.r * 0.5 && this.dmg > 0){
           e.takeDamage(this.dmg);
           addText(e.x, e.y - e.r - 6, Math.round(this.dmg), '#ffd27d', 11);
         }
@@ -907,8 +908,10 @@ class Projectile {
     } else {
       const e = this.target;
       if (e && !e.dead){
-        e.takeDamage(this.dmg);
-        addText(e.x, e.y - e.r - 6, Math.round(this.dmg), '#ffffff', 11);
+        if (this.dmg > 0){
+          e.takeDamage(this.dmg);
+          addText(e.x, e.y - e.r - 6, Math.round(this.dmg), '#ffffff', 11);
+        }
         if (this.poison && !e.flying){
           e.poisons.push({dps: this.poison.dps, t: this.poison.dur});
           if (e.poisons.length > 3) e.poisons.shift();
