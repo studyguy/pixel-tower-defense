@@ -2,6 +2,18 @@
 
 > 网页版即时战略（RTS）塔防游戏 —— 单文件、零依赖、离线可玩、中文界面
 
+## 🎮 点击即玩
+
+**无需下载代码、无需安装、无需懂编程 —— 点击下面的链接，用浏览器打开就能玩：**
+
+### ▶️ [点击这里，立即开始游戏！](https://studyguy.github.io/pixel-tower-defense/)
+
+> 该链接通过 GitHub Pages 直接访问项目主页 `index.html`，电脑、平板、手机浏览器均可打开。
+
+## 🛠️ 开发说明
+
+本项目由本人（[studyguy](https://github.com/studyguy)）通过 **Web Coding** 方式独立开发完成。
+
 ---
 
 ## 目录
@@ -36,7 +48,8 @@
 
 | 项目 | 说明 |
 |---|---|
-| 运行方式 | 双击 `index.html`，用浏览器直接打开（`file://` 协议即可） |
+| **在线游玩（推荐）** | **[点击即玩](https://studyguy.github.io/pixel-tower-defense/)** —— GitHub Pages 在线版，无需下载任何文件 |
+| 本地运行 | 双击 `index.html`，用浏览器直接打开（`file://` 协议即可） |
 | 兼容性 | Chrome / Edge / Firefox / Safari（近两年版本），桌面与移动浏览器均可 |
 | 画面适配 | 自动等比缩放居中，适配任意窗口尺寸（高分屏按 devicePixelRatio 渲染，画面清晰） |
 | 页面滚动 | 已禁止（拦截滚轮 / 触摸 / 方向键 / 空格） |
