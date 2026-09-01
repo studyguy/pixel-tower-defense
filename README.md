@@ -12,7 +12,7 @@
 
 ## 🛠️ 开发说明
 
-本项目由本人（[studyguy](https://github.com/studyguy)）通过 **Web Coding** 方式独立开发完成。
+本项目由本人（[studyguy](https://github.com/studyguy)）通过 **Vibe Coding** 方式独立开发完成，仅供学习参考和娱乐，若和别的项目有相似之处，纯属巧合。
 
 ---
 
